@@ -69,6 +69,23 @@ pnpm --filter example-frontend test           # Run tests
 - `erasableSyntaxOnly: true` — no TypeScript-only constructor parameter properties allowed
 - `verbatimModuleSyntax: true` — `import type` required for type-only imports
 
+## Versioning
+
+This repo uses [changesets](https://github.com/changesets/changesets) for versioning and
+changelog management.
+
+Every PR that changes code must include a changeset:
+
+```bash
+pnpm exec changeset add          # select packages and bump type
+pnpm exec changeset add --empty  # chore/internal changes with no version bump
+```
+
+The release workflow runs automatically on push to `main`:
+
+- If changesets are present → opens a "Version Packages" PR
+- When that PR merges → publishes to npm via OIDC trusted publishing
+
 ## Adding a New Package
 
 1. Create `packages/<name>/` with `package.json`, `tsconfig.json`, `tsconfig.build.json`

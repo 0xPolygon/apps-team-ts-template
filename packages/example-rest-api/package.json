@@ -3,8 +3,16 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xPolygon/apps-team-ts-template.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "scripts": {
+    "prePublishOnly": "pnpm run build",
     "start": "node dist/index.js",
     "build": "tsc -p tsconfig.build.json",
     "dev": "node src/index.ts",
