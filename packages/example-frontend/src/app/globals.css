@@ -1,0 +1,50 @@
+@import 'tailwindcss';
+
+:root {
+  /* Primary */
+  --primary: #7b3fe4;
+  --primary-light: #ede5fb;
+
+  /* Success */
+  --green: #5faf84;
+  --green-light: #eafff5;
+
+  /* Error */
+  --red: #ff3b32;
+  --red-light: #dc362e29;
+
+  /* Grey */
+  --grey: rgba(0, 0, 0, 0.64);
+  --grey-light: #ededed;
+  --grey-bg: #f9f9f9;
+
+  /* Base */
+  --white: #ffffff;
+  --black: #000000;
+
+  /* App-level aliases */
+  --background: var(--grey-bg);
+  --foreground: var(--black);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
+
+  --color-red: var(--red);
+  --color-red-light: var(--red-light);
+
+  --color-grey: var(--grey);
+  --color-grey-light: var(--grey-light);
+  --color-grey-bg: var(--grey-bg);
+
+  --shadow-card: 0 16px 32px -8px rgba(0, 0, 0, 0.16);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

@@ -1,0 +1,22 @@
+name = "example-frontend"
+compatibility_date = "2026-03-06"
+placement = { mode = "smart" }
+workers_dev = false
+preview_urls = false
+send_metrics = false
+
+[assets]
+directory = "./out"
+
+[build]
+command = "pnpm run build"
+
+[env.staging]
+routes = [
+  { pattern = "example.staging.yourdomain.com", custom_domain = true }
+]
+
+[env.production]
+routes = [
+  { pattern = "example.yourdomain.com", custom_domain = true }
+]
