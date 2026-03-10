@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   check:
@@ -27,15 +26,4 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1.7.0
-        id: changesets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Fail if no changeset present
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        run: |
-          echo "No changeset found."
-          echo "  - For a version bump: pnpm exec changeset add"
-          echo "  - For chore/internal changes: pnpm exec changeset add --empty"
-          exit 1
+      - run: pnpm exec changeset status --since=origin/main
