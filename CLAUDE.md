@@ -25,40 +25,13 @@ See `pnpm-workspace.yaml` for workspace configuration.
 
 - Dev tooling (ESLint, Prettier, markdownlint, Husky, TypeScript base config) is at the root
 - Runtime dependencies are declared in each package's `package.json`
-- Each package has its own `tsconfig.json` — backend packages extend the root
-  config; `example-frontend` uses a standalone Vite-compatible tsconfig
+- Each package has its own `tsconfig.json` extending the root base config
 
 ## Commands
 
-Root-level commands (run from repo root):
-
-```bash
-pnpm run lint       # ESLint + markdownlint + prettier check + typecheck (all parallel)
-pnpm run format     # Auto-fix lint and formatting in-place
-pnpm run typecheck  # Type-check all packages
-pnpm test           # Run tests across all packages
-pnpm run build      # Build all packages
-```
-
-Package-level commands (example-rest-api):
-
-```bash
-pnpm --filter example-rest-api run dev        # Start dev server
-pnpm --filter example-rest-api start          # Start compiled server
-pnpm --filter example-rest-api run build      # Build single package
-pnpm --filter example-rest-api run typecheck  # Typecheck single package
-pnpm --filter example-rest-api test           # Test single package
-```
-
-Package-level commands (example-frontend):
-
-```bash
-pnpm --filter example-frontend run dev        # Vite dev server
-pnpm --filter example-frontend run build      # Build to dist/
-pnpm --filter example-frontend run preview    # Preview production build
-pnpm --filter example-frontend run typecheck  # Typecheck
-pnpm --filter example-frontend test           # Run tests
-```
+Root-level scripts are in the root `package.json`. Package-level scripts are in each
+package's `package.json` under `packages/` and can be run with
+`pnpm --filter <package-name> run <script>`.
 
 ## TypeScript Setup
 
@@ -81,10 +54,7 @@ pnpm exec changeset add          # select packages and bump type
 pnpm exec changeset add --empty  # chore/internal changes with no version bump
 ```
 
-The release workflow runs automatically on push to `main`:
-
-- If changesets are present → opens a "Version Packages" PR
-- When that PR merges → publishes to npm via OIDC trusted publishing
+The release workflow is in `.github/workflows/release.yml`.
 
 ## Adding a New Package
 
