@@ -9,6 +9,6 @@
   "bumpVersionsWithWorkspaceProtocolOnly": true,
   "privatePackages": {
     "version": true,
-    "tag": false
+    "tag": true
   }
 }
