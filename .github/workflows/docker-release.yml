@@ -1,0 +1,114 @@
+name: Docker release
+
+on:
+  push:
+    tags:
+      - '*@[0-9]*' # all package version tags (scoped and unscoped)
+        # schemas/client packages exit early via should_build=false (no Dockerfile)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Full changeset tag to build (e.g. example-rest-api@1.2.3)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      image_name: ${{ steps.resolve.outputs.image_name }}
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
+      package_name: ${{ steps.resolve.outputs.package_name }}
+      dockerfile_path: ${{ steps.resolve.outputs.dockerfile_path }}
+      checkout_ref: ${{ steps.resolve.outputs.checkout_ref }}
+      should_build: ${{ steps.resolve.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          # No cache: pnpm — no install step in this job
+          # Node is required by pnpm exec to resolve workspace filters
+
+      - name: Resolve service, version and Dockerfile
+        id: resolve
+        env:
+          # inputs.tag is user-controlled — assign to env var before use in shell
+          # to prevent expression injection if the value contains quotes or metacharacters.
+          # github.ref_name is set by GitHub (trusted) so GITHUB_REF_NAME is safe directly.
+          TAG_INPUT: ${{ inputs.tag || '' }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            REF="${TAG_INPUT}"
+          else
+            REF="${GITHUB_REF_NAME}"
+          fi
+
+          SERVICE="${REF%@*}"    # strip @version — e.g. @polygonlabs/gas-station
+          VERSION="${REF##*@}"   # strip name@  — e.g. 2.1.0
+
+          # Strip @scope/ prefix for use as Docker image name (e.g. gas-station)
+          IMAGE_NAME="${SERVICE#@*/}"
+
+          # Locate the package directory via pnpm workspace filter.
+          # Works without pnpm install — pnpm resolves workspace structure from
+          # pnpm-workspace.yaml and package.json files.
+          PKG_DIR=$(pnpm --filter "${SERVICE}" exec -- node -e \
+            "process.stdout.write(process.cwd())" 2>/dev/null || echo "")
+
+          if [ -z "$PKG_DIR" ]; then
+            echo "Package ${SERVICE} not found in workspace — skipping"
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Read dockerfile path from package.json (path relative to package dir).
+          # Presence of this field marks the package as deployable.
+          DOCKERFILE_REL=$(jq -r '.dockerfile // empty' "${PKG_DIR}/package.json")
+
+          if [ -z "$DOCKERFILE_REL" ]; then
+            echo "No 'dockerfile' field in ${SERVICE} package.json — skipping"
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Make path relative to repo root (the Docker build context).
+          # Edge case: if PKG_DIR == GITHUB_WORKSPACE (root package in a single-package
+          # repo), PKG_DIR_REL is empty and DOCKERFILE is just the filename itself.
+          PKG_DIR_REL="${PKG_DIR#${GITHUB_WORKSPACE}/}"
+          if [ -n "$PKG_DIR_REL" ]; then
+            DOCKERFILE="${PKG_DIR_REL}/${DOCKERFILE_REL}"
+          else
+            DOCKERFILE="${DOCKERFILE_REL}"
+          fi
+
+          echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "package_name=${SERVICE}" >> "$GITHUB_OUTPUT"
+          echo "dockerfile_path=${DOCKERFILE}" >> "$GITHUB_OUTPUT"
+          echo "checkout_ref=${REF}" >> "$GITHUB_OUTPUT"
+          echo "should_build=true" >> "$GITHUB_OUTPUT"
+
+  docker-release:
+    needs: resolve
+    if: needs.resolve.outputs.should_build == 'true'
+    uses: 0xPolygon/pipelines/.github/workflows/gcp_pipeline_release_image.yaml@main
+    secrets: inherit
+    with:
+      image_name: ${{ needs.resolve.outputs.image_name }}
+      image_tag: ${{ needs.resolve.outputs.image_tag }}
+      dockerfile_path: ${{ needs.resolve.outputs.dockerfile_path }}
+      checkout_ref: ${{ needs.resolve.outputs.checkout_ref }}
+      # SERVICE_NAME is the full npm package name passed as a Docker build arg.
+      # Requires gcp_pipeline_release_image.yaml to forward build_args to
+      # docker/build-push-action (one-line addition to the shared pipeline).
+      build_args: SERVICE_NAME=${{ needs.resolve.outputs.package_name }}

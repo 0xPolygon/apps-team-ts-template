@@ -2,7 +2,6 @@
   "name": "example-rest-api",
   "version": "0.0.0",
   "type": "module",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/0xPolygon/apps-team-ts-template.git"
@@ -10,10 +9,14 @@
   "publishConfig": {
     "access": "public"
   },
+  "dockerfile": "Dockerfile",
   "main": "dist/index.js",
+  "files": [
+    "src/"
+  ],
   "scripts": {
     "prePublishOnly": "pnpm run build",
-    "start": "node dist/index.js",
+    "start": "node src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "dev": "node src/index.ts",
     "test": "vitest run",

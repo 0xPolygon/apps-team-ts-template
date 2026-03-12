@@ -1,0 +1,17 @@
+.git
+.github
+.husky
+.claude
+.changeset
+*.md
+
+node_modules
+**/node_modules
+
+**/dist
+
+.env*
+
+# Test files not needed in production images
+packages/*/tests
+packages/*/vitest.config.ts
