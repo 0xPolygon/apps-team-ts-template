@@ -8,7 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['src/test/setup.ts'],
     env: {
-      NEXT_PUBLIC_REOWN_PROJECT_ID: 'test-project-id'
+      VITE_SEQUENCE_PROJECT_ACCESS_KEY: 'test-project-access-key',
+      VITE_SEQUENCE_WAAS_KEY: 'test-waas-key'
     }
   }
 });

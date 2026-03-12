@@ -10,5 +10,5 @@ export default [
       (pattern) => `packages/example-frontend/${pattern}`
     )
   })),
-  { ignores: ['.claude/**', '**/out/**', '**/.next/**', '**/next-env.d.ts'] }
+  { ignores: ['.claude/**', '**/dist/**'] }
 ];

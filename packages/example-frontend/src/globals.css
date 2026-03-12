@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+:root {
+  /* Primary — muted blue-grey */
+  --primary: #6b7a8d;
+  --primary-light: #e8ecf0;
+
+  /* Success */
+  --green: #6b9e7e;
+  --green-light: #e8f5ee;
+
+  /* Error — muted red */
+  --red: #b85c5c;
+  --red-light: #f5e8e8;
+
+  /* Grey */
+  --grey: rgba(255, 255, 255, 0.5);
+  --grey-light: #2a2d31;
+  --grey-bg: #18191b;
+
+  /* Surfaces */
+  --surface: #1e2024;
+
+  /* App-level aliases */
+  --background: var(--grey-bg);
+  --foreground: #e8e8e8;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
+
+  --color-red: var(--red);
+  --color-red-light: var(--red-light);
+
+  --color-grey: var(--grey);
+  --color-grey-light: var(--grey-light);
+  --color-grey-bg: var(--grey-bg);
+  --color-surface: var(--surface);
+
+  --shadow-card: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+}

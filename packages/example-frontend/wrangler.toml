@@ -6,7 +6,7 @@ preview_urls = false
 send_metrics = false
 
 [assets]
-directory = "./out"
+directory = "./dist"
 
 [build]
 command = "pnpm run build"

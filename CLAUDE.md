@@ -26,7 +26,7 @@ See `pnpm-workspace.yaml` for workspace configuration.
 - Dev tooling (ESLint, Prettier, markdownlint, Husky, TypeScript base config) is at the root
 - Runtime dependencies are declared in each package's `package.json`
 - Each package has its own `tsconfig.json` — backend packages extend the root
-  config; `example-frontend` uses a standalone Next.js-compatible tsconfig
+  config; `example-frontend` uses a standalone Vite-compatible tsconfig
 
 ## Commands
 
@@ -53,8 +53,9 @@ pnpm --filter example-rest-api test           # Test single package
 Package-level commands (example-frontend):
 
 ```bash
-pnpm --filter example-frontend run dev        # Next.js dev server (Turbopack)
-pnpm --filter example-frontend run build      # Static export to out/
+pnpm --filter example-frontend run dev        # Vite dev server
+pnpm --filter example-frontend run build      # Build to dist/
+pnpm --filter example-frontend run preview    # Preview production build
 pnpm --filter example-frontend run typecheck  # Typecheck
 pnpm --filter example-frontend test           # Run tests
 ```

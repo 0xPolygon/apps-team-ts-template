@@ -2,5 +2,3 @@
 *.md
 dist/
 pnpm-lock.yaml
-.next/
-out/

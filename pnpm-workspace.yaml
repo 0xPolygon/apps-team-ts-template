@@ -13,10 +13,9 @@ minimumReleaseAgeExclude:
 # where __VERSION__ is not replaced at build time, crashing on Node 24.
 overrides:
   katex: ^0.16.38
+onlyBuiltDependencies:
+  - esbuild
 trustPolicy: no-downgrade
-# deps from reown/wallet kit that have trust downgrades
 trustPolicyExclude:
+  - 'undici-types@6.19.8'
   - 'semver@6.3.1'
-  - '@noble/curves@1.8.0'
-  - '@noble/hashes@1.7.0'
-  - 'slow-redact@0.3.2'
