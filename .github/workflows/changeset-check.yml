@@ -11,5 +11,60 @@ permissions:
 
 jobs:
   check:
-    uses: 0xPolygon/apps-team-workflows/.github/workflows/changeset-check.yml@main
-    secrets: inherit
+    name: Require changeset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check for changeset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if pnpm exec changeset status --since=origin/main; then
+            exit 0
+          fi
+
+          MARKER="<!-- changeset-check-required -->"
+
+          BODY="${MARKER}
+
+          ## Changeset required
+
+          This PR is missing a changeset. Please add one before merging.
+
+          **For a code change that should bump a package version:**
+          \`\`\`bash
+          pnpm exec changeset add
+          \`\`\`
+          Select the packages that changed and the bump type (\`patch\` / \`minor\` / \`major\`).
+
+          **For a chore, CI change, or other non-version-bumping change:**
+          \`\`\`bash
+          pnpm exec changeset add --empty
+          \`\`\`"
+
+          # Update existing comment if one exists, otherwise create a new one
+          COMMENT_ID=$(gh pr view "$PR_NUMBER" --json comments \
+            --jq '.comments[] | select(.body | startswith("<!-- changeset-check-required -->")) | .databaseId' \
+            | head -1)
+
+          if [ -n "$COMMENT_ID" ]; then
+            gh api "repos/${{ github.repository }}/issues/comments/$COMMENT_ID" \
+              -X PATCH -f body="$BODY"
+          else
+            gh pr comment "$PR_NUMBER" --body "$BODY"
+          fi
+
+          exit 1
