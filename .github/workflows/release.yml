@@ -43,6 +43,10 @@ jobs:
           publish: pnpm run ci:publish
           title: 'changesets: Release / Deploy'
           commit: 'release: version packages'
+          # github-api mode signs commits with GitHub's GPG key, satisfying the
+          # repository's signed-commits requirement. git-cli (the default) produces
+          # unsigned commits.
+          commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           # No NPM_TOKEN — using OIDC trusted publishing
