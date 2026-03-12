@@ -56,8 +56,9 @@ jobs:
           \`\`\`"
 
           # Update existing comment if one exists, otherwise create a new one
-          COMMENT_ID=$(gh pr view "$PR_NUMBER" --json comments \
-            --jq '.comments[] | select(.body | startswith("<!-- changeset-check-required -->")) | .databaseId' \
+          # Use the REST API directly — more reliable than GraphQL databaseId
+          COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/$PR_NUMBER/comments" \
+            --jq '.[] | select(.body | startswith("<!-- changeset-check-required -->")) | .id' \
             | head -1)
 
           if [ -n "$COMMENT_ID" ]; then
