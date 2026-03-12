@@ -28,44 +28,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Check for changeset
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          if pnpm exec changeset status --since=origin/main; then
-            exit 0
-          fi
+        id: check
+        run: pnpm exec changeset status --since=origin/main
+        continue-on-error: true
 
-          MARKER="<!-- changeset-check-required -->"
+      - name: Post or update missing changeset comment
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fn = require('./.github/scripts/upsert-changeset-comment.cjs')
+            await fn({ github, context })
 
-          BODY="${MARKER}
-
-          ## Changeset required
-
-          This PR is missing a changeset. Please add one before merging.
-
-          **For a code change that should bump a package version:**
-          \`\`\`bash
-          pnpm exec changeset add
-          \`\`\`
-          Select the packages that changed and the bump type (\`patch\` / \`minor\` / \`major\`).
-
-          **For a chore, CI change, or other non-version-bumping change:**
-          \`\`\`bash
-          pnpm exec changeset add --empty
-          \`\`\`"
-
-          # Update existing comment if one exists, otherwise create a new one
-          # Use the REST API directly — more reliable than GraphQL databaseId
-          COMMENT_ID=$(gh api "repos/${{ github.repository }}/issues/$PR_NUMBER/comments" \
-            --jq '.[] | select(.body | startswith("<!-- changeset-check-required -->")) | .id' \
-            | head -1)
-
-          if [ -n "$COMMENT_ID" ]; then
-            gh api "repos/${{ github.repository }}/issues/comments/$COMMENT_ID" \
-              -X PATCH -f body="$BODY"
-          else
-            gh pr comment "$PR_NUMBER" --body "$BODY"
-          fi
-
-          exit 1
+      - name: Fail if no changeset
+        if: steps.check.outcome == 'failure'
+        run: exit 1
