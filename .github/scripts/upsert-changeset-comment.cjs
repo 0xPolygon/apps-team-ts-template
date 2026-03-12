@@ -19,7 +19,7 @@ Select the packages that changed and the bump type (\`patch\` / \`minor\` / \`ma
 pnpm exec changeset add --empty
 \`\`\``;
 
-module.exports = async ({ github, context }) => {
+module.exports = async ({ github, context, passed }) => {
   const { owner, repo } = context.repo;
   const issue_number = context.payload.pull_request.number;
 
@@ -32,6 +32,19 @@ module.exports = async ({ github, context }) => {
 
   const existing = comments.find((c) => c.body.startsWith(MARKER));
 
+  if (passed) {
+    // Changeset found — delete any lingering nag comment
+    if (existing) {
+      await github.rest.issues.deleteComment({
+        owner,
+        repo,
+        comment_id: existing.id
+      });
+    }
+    return;
+  }
+
+  // No changeset — post or update the nag comment
   if (existing) {
     await github.rest.issues.updateComment({
       owner,

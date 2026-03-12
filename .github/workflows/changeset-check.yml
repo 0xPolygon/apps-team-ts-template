@@ -32,13 +32,14 @@ jobs:
         run: pnpm exec changeset status --since=origin/main
         continue-on-error: true
 
-      - name: Post or update missing changeset comment
-        if: steps.check.outcome == 'failure'
+      - name: Manage changeset comment
+        if: steps.check.outcome == 'success' || steps.check.outcome == 'failure'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const fn = require('./.github/scripts/upsert-changeset-comment.cjs')
-            await fn({ github, context })
+            const passed = '${{ steps.check.outcome }}' === 'success'
+            await fn({ github, context, passed })
 
       - name: Fail if no changeset
         if: steps.check.outcome == 'failure'
