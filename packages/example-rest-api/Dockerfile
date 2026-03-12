@@ -21,11 +21,9 @@ RUN pnpm run build
 # pnpm resolves workspace:* deps and copies their declared 'files' (e.g. dist/ for
 # schemas). No explicit COPY for each dep — pnpm handles all workspace resolution.
 #
-# SERVICE_NAME is the full npm package name (e.g. @polygonlabs/gas-station or
-# example-rest-api). Passed as --build-arg from docker-release.yml. No default —
-# fails fast at build time if not provided.
-# Every service Dockerfile is identical — SERVICE_NAME is the only variable.
-ARG SERVICE_NAME
+# SERVICE_NAME is the full npm package name for this service.
+# Default matches this Dockerfile's package — override with --build-arg if needed.
+ARG SERVICE_NAME=example-rest-api
 RUN pnpm --filter "${SERVICE_NAME}" deploy --prod --legacy /deploy
 
 
