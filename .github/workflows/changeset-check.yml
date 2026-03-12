@@ -11,5 +11,5 @@ permissions:
 
 jobs:
   check:
-    uses: 0xPolygon/apps-team-ops/.github/workflows/changeset-check.yml@main
+    uses: 0xPolygon/apps-team-workflows/.github/workflows/changeset-check.yml@main
     secrets: inherit
