@@ -25,7 +25,8 @@ See `pnpm-workspace.yaml` for workspace configuration.
 
 - Dev tooling (ESLint, Prettier, markdownlint, Husky, TypeScript base config) is at the root
 - Runtime dependencies are declared in each package's `package.json`
-- Each package has its own `tsconfig.json` extending the root base config
+- Each package has its own `tsconfig.json` — backend packages extend the root
+  config; `example-frontend` uses a standalone Vite-compatible tsconfig
 
 ## Commands
 
@@ -39,7 +40,7 @@ pnpm test           # Run tests across all packages
 pnpm run build      # Build all packages
 ```
 
-Package-level commands:
+Package-level commands (example-rest-api):
 
 ```bash
 pnpm --filter example-rest-api run dev        # Start dev server
@@ -47,6 +48,16 @@ pnpm --filter example-rest-api start          # Start compiled server
 pnpm --filter example-rest-api run build      # Build single package
 pnpm --filter example-rest-api run typecheck  # Typecheck single package
 pnpm --filter example-rest-api test           # Test single package
+```
+
+Package-level commands (example-frontend):
+
+```bash
+pnpm --filter example-frontend run dev        # Vite dev server
+pnpm --filter example-frontend run build      # Build to dist/
+pnpm --filter example-frontend run preview    # Preview production build
+pnpm --filter example-frontend run typecheck  # Typecheck
+pnpm --filter example-frontend test           # Run tests
 ```
 
 ## TypeScript Setup
