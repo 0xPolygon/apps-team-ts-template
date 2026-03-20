@@ -11,7 +11,10 @@ permissions: {}
 jobs:
   claude-review:
     # Only run on PRs from the same repository (not forks) to avoid API costs on external contributions
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft &&
+      !contains(github.event.pull_request.labels.*.name, 'disable-claude-code-review')
     runs-on: ubuntu-latest
     permissions:
       contents: read
