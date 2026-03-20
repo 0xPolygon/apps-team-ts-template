@@ -8,9 +8,15 @@
   "engines": {
     "node": ">=24"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xPolygon/apps-team-ts-template.git"
+  },
   "scripts": {
     "prepare": "husky",
-    "build": "pnpm -r run build",
+    "release": "changeset publish",
+    "ci:publish": "pnpm publish -r",
+    "build": "pnpm -r --if-present run build",
     "test": "pnpm -r run test",
     "typecheck": "pnpm -r run typecheck",
     "lint": "concurrently --group --prefix-colors auto 'pnpm:lint:md' 'pnpm:lint:ts' 'pnpm:typecheck' 'prettier --check .'",
@@ -21,6 +27,7 @@
     "format:ts": "eslint . --fix"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "@commitlint/cli": "^19.0.0",
     "@commitlint/config-conventional": "^19.0.0",
     "@polygonlabs/apps-team-lint": "^1.0.0",
