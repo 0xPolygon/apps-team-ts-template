@@ -1,0 +1,13 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions: {}
+
+jobs:
+  claude-review:
+    uses: 0xPolygon/apps-team-workflows/.github/workflows/claude-code-review.yml@main
+    secrets:
+      CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
