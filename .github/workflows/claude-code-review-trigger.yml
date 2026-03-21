@@ -4,7 +4,12 @@ on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
 
-permissions: {}
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+  id-token: write
+  actions: read
 
 jobs:
   claude-review:
