@@ -1,5 +1,11 @@
 # example-rest-api
 
+## 0.1.1
+
+### Patch Changes
+
+- 7fe2216: Testing docker deployment pipeline
+
 ## 0.1.0
 
 ### Minor Changes
