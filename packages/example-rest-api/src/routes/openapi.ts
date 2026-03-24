@@ -11,7 +11,7 @@ import { z } from 'zod';
 
 extendZodWithOpenApi(z);
 
-const { version } = createRequire(import.meta.url)('../../../package.json') as {
+const { version } = createRequire(import.meta.url)('../../package.json') as {
   version: string;
 };
 
