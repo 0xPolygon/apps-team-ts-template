@@ -54,7 +54,7 @@ pnpm exec changeset add          # select packages and bump type
 pnpm exec changeset add --empty  # chore/internal changes with no version bump
 ```
 
-The release workflow is in `.github/workflows/release.yml`.
+The release workflow trigger is in `.github/workflows/npm-release-trigger.yml`.
 
 ## Workspace Dependency Convention
 
