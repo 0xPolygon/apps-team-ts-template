@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   ci:
+    name: CI - lint / typecheck / test
     runs-on: ubuntu-latest
     steps:
       - uses: 0xPolygon/apps-team-workflows/.github/actions/ci@main
