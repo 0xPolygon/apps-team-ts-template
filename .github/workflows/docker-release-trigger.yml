@@ -16,9 +16,32 @@ permissions:
   id-token: write
 
 jobs:
-  docker-release:
+  test:
+    runs-on: ubuntu-latest
+    # env:                                          # Declare service-specific test vars here.
+    #   MY_RPC: https://...?token=${{ secrets.MY_TOKEN }}  # Values composed from secrets.
+    # Pass the var names to test_vars below so the action forwards them to the container.
+    outputs:
+      image_name: ${{ steps.docker-test.outputs.image_name }}
+      image_tag: ${{ steps.docker-test.outputs.image_tag }}
+      dockerfile_path: ${{ steps.docker-test.outputs.dockerfile_path }}
+      checkout_ref: ${{ steps.docker-test.outputs.checkout_ref }}
+      should_build: ${{ steps.docker-test.outputs.should_build }}
+    steps:
+      - id: docker-test
+        uses: 0xPolygon/apps-team-workflows/.github/actions/docker-test@main
+        with:
+          tag: ${{ inputs.tag || '' }}
+          # test_vars: MY_RPC OTHER_VAR   # space-separated env var names to forward to the container
+
+  release:
+    needs: test
+    if: needs.test.outputs.should_build == 'true'
     uses: 0xPolygon/apps-team-workflows/.github/workflows/docker-release.yml@main
     with:
-      tag: ${{ inputs.tag || '' }}
+      image_name: ${{ needs.test.outputs.image_name }}
+      image_tag: ${{ needs.test.outputs.image_tag }}
+      dockerfile_path: ${{ needs.test.outputs.dockerfile_path }}
+      checkout_ref: ${{ needs.test.outputs.checkout_ref }}
     secrets:
       build_params_gh_secret_keys: ${{ secrets.build_params_gh_secret_keys }}
