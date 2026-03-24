@@ -55,7 +55,7 @@ const spec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
 
 const router = Router();
 
-router.get('/openapi.json', (_req, res) => {
+router.get('/openapi.json', async (_req, res) => {
   res.json(spec);
 });
 

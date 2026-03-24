@@ -11,7 +11,7 @@ export function getExpressApp() {
   app.use(helmet());
   app.use(express.json());
 
-  app.get('/health-check', (_req, res) => {
+  app.get('/health-check', async (_req, res) => {
     res.json({ success: true });
   });
 

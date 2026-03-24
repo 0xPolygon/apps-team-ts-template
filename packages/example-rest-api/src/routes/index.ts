@@ -7,7 +7,7 @@ export function buildRouter(): Router {
 
   router.use('/', openApiRouter);
 
-  router.get('/hello', (_req, res) => {
+  router.get('/hello', async (_req, res) => {
     res.json({ message: 'Hello, world!' });
   });
 
