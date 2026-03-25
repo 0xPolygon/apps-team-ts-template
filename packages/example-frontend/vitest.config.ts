@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['src/test/setup.ts'],
+    reporters: process.env.CI ? ['verbose'] : undefined,
     env: {
       VITE_SEQUENCE_PROJECT_ACCESS_KEY: 'test-project-access-key',
       VITE_SEQUENCE_WAAS_KEY: 'test-waas-key'
