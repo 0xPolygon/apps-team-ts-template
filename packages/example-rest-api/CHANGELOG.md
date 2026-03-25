@@ -1,5 +1,11 @@
 # example-rest-api
 
+## 0.1.2
+
+### Patch Changes
+
+- bb84f54: Upgrade express from v4 to v5
+
 ## 0.1.1
 
 ### Patch Changes
