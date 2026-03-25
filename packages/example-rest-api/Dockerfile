@@ -21,10 +21,12 @@ RUN pnpm run build
 # pnpm resolves workspace:* deps and copies their declared 'files' (e.g. dist/ for
 # schemas). No explicit COPY for each dep — pnpm handles all workspace resolution.
 #
-# SERVICE_NAME is the full npm package name for this service.
-# Default matches this Dockerfile's package — override with --build-arg if needed.
-ARG SERVICE_NAME=example-rest-api
-RUN pnpm --filter "${SERVICE_NAME}" deploy --prod --legacy /deploy
+# cd into the package before deploying — pnpm deploy without --filter works from
+# the package directory in both single-package and monorepo repos, so no ARG or
+# --filter is needed. Single-package repos keep WORKDIR /app; monorepos set it to
+# the package subdirectory here.
+WORKDIR /app/packages/example-rest-api
+RUN pnpm deploy --prod --legacy /deploy
 
 
 # Stage 2: minimal runtime — no pnpm, no devDeps, no workspace knowledge
