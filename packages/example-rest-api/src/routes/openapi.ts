@@ -1,3 +1,5 @@
+import { createRequire } from 'module';
+
 import {
   OpenAPIRegistry,
   OpenApiGeneratorV3,
@@ -8,6 +10,10 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 extendZodWithOpenApi(z);
+
+const { version } = createRequire(import.meta.url)('../../package.json') as {
+  version: string;
+};
 
 const registry = new OpenAPIRegistry();
 
@@ -47,7 +53,7 @@ const spec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
   openapi: '3.0.0',
   info: {
     title: 'Example REST API',
-    version: '0.0.0',
+    version,
     description: 'Stubbed REST API with OpenAPI documentation'
   },
   servers: [{ url: '/' }]
@@ -55,7 +61,7 @@ const spec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
 
 const router = Router();
 
-router.get('/openapi.json', (_req, res) => {
+router.get('/openapi.json', async (_req, res) => {
   res.json(spec);
 });
 
