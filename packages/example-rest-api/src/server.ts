@@ -1,3 +1,4 @@
+import type { JsonRpcProvider } from 'ethers';
 import type { NextFunction, Request, Response } from 'express';
 
 import { randomUUID } from 'node:crypto';
@@ -18,7 +19,7 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export function getExpressApp(logger: Logger) {
+export function getExpressApp(logger: Logger, provider: JsonRpcProvider) {
   const app = express();
 
   app.use(cors());
@@ -34,7 +35,7 @@ export function getExpressApp(logger: Logger) {
     res.json({ success: true });
   });
 
-  app.use('/api', buildRouter());
+  app.use('/api', buildRouter(provider));
 
   app.use((req, res) => {
     const err = new NotFound(`${req.method} ${req.path}`);

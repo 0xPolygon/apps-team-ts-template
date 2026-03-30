@@ -8,7 +8,7 @@
     "start": "node src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "dev": "dotenvx run -- node src/index.ts",
-    "test": "vitest run",
+    "test": "dotenvx run --env-file .env.test -- vitest run",
     "typecheck": "tsc --noEmit",
     "prePublishOnly": "pnpm run build"
   },
@@ -20,6 +20,7 @@
     "@sentry/node": "^10.0.0",
     "@t3-oss/env-core": "^0.13.10",
     "cors": "^2.8.5",
+    "ethers": "^6.16.0",
     "express": "^5.0.0",
     "helmet": "^7.0.0",
     "zod": "^4.3.6"
