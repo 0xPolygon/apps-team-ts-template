@@ -26,6 +26,31 @@ const RpcUrlSchema = z.string().superRefine((url, ctx) => {
   }
 });
 
+// Parses a JSON-encoded string array of RPC URLs, validating each element
+// with RpcUrlSchema. Use this pattern when a service needs multiple RPC
+// endpoints for retry/failover. Used as a .transform() callback in the env schema.
+const parseRpcUrlArray = (val: string, ctx: z.RefinementCtx) => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(val);
+  } catch {
+    ctx.addIssue('Must be valid JSON.');
+    return z.NEVER;
+  }
+  if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === 'string')) {
+    ctx.addIssue('Must be a valid JSON string array.');
+    return z.NEVER;
+  }
+  for (const url of parsed as string[]) {
+    const result = RpcUrlSchema.safeParse(url);
+    if (!result.success) {
+      ctx.addIssue(result.error.issues[0]?.message ?? 'Invalid RPC URL');
+      return z.NEVER;
+    }
+  }
+  return parsed as string[];
+};
+
 // Ref: https://github.com/t3-oss/t3-env/pull/145
 const truthyStrings = ['true', 'yes', 'y', '1', 'on'];
 const falsyStrings = ['false', 'no', 'n', '0', 'off'];
@@ -51,6 +76,10 @@ function buildEnv() {
       NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
       PORT: z.coerce.number().default(3000),
       RPC_URL: RpcUrlSchema,
+      // Use RPC_URLS (JSON array) when the service needs multiple endpoints
+      // for retry/failover. Each element is validated by RpcUrlSchema.
+      // Example value: '["https://rpc1.example.com","https://rpc2.example.com"]'
+      RPC_URLS: z.string().transform(parseRpcUrlArray).optional(),
       RPC_CHAIN_ID: z.coerce.number().int().positive(),
       PRETTY_LOGS: BooleanOrBooleanStringSchema.optional(),
       SENTRY_DSN: z.url().optional()
