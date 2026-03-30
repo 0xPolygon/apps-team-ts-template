@@ -1,13 +1,14 @@
 import supertest from 'supertest';
 import { describe, expect, it } from 'vitest';
 
+import { createLogger } from '../src/logger.ts';
 import { getExpressApp } from '../src/server.ts';
 
 // When TEST_BASE_URL is set the same suite runs against a deployed Docker
 // container; otherwise it runs against the local Express app directly.
 const request = process.env.TEST_BASE_URL
   ? supertest(process.env.TEST_BASE_URL)
-  : supertest(getExpressApp());
+  : supertest(getExpressApp(await createLogger()));
 
 describe('API', () => {
   describe('GET /health-check', () => {

@@ -1,10 +1,15 @@
-import { env } from './env.ts';
+// Must be first: initializes Sentry before any other module loads.
+import './sentry.ts';
+import { getEnv } from './env.ts';
+import { createLogger } from './logger.ts';
 import { getExpressApp } from './server.ts';
 
-const app = getExpressApp();
+const logger = await createLogger();
 
-const server = app.listen(env.PORT, () => {
-  console.log(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
+const app = getExpressApp(logger);
+
+const server = app.listen(getEnv().PORT, () => {
+  logger.info({ port: getEnv().PORT, nodeEnv: getEnv().NODE_ENV }, 'server started');
 });
 
 const shutdown = () => {
