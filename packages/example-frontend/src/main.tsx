@@ -1,4 +1,4 @@
-import './instrument';
+import './sentry';
 import './globals.css';
 
 import { StrictMode } from 'react';
