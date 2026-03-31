@@ -1,4 +1,4 @@
 {
   "extends": ["@tsconfig/node24", "@tsconfig/node-ts"],
-  "compilerOptions": { "noEmit": true }
+  "compilerOptions": { "noEmit": true, "noUncheckedSideEffectImports": true }
 }
