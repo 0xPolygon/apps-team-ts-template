@@ -49,6 +49,24 @@ registry.registerPath({
   }
 });
 
+registry.registerPath({
+  method: 'get',
+  path: '/api/block-number',
+  summary: 'Current block number',
+  responses: {
+    200: {
+      description: 'Latest block number from the configured RPC endpoint',
+      content: {
+        'application/json': {
+          schema: z
+            .object({ blockNumber: z.number().int().nonnegative() })
+            .openapi('BlockNumberResponse')
+        }
+      }
+    }
+  }
+});
+
 const spec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
   openapi: '3.0.0',
   info: {
