@@ -1,6 +1,7 @@
 import { formatUnits } from 'viem';
 import { useConnection } from 'wagmi';
 
+import { useBlockNumber } from '../hooks/use-block-number';
 import { useNativeBalance } from '../hooks/use-native-balance';
 import { cn } from '../utils/cn';
 import { shortenAddress } from '../utils/shorten-address';
@@ -17,6 +18,7 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 export const WalletDetails = () => {
   const { address } = useConnection();
   const { data: balance, isLoading, isError } = useNativeBalance(address);
+  const { data: blockData } = useBlockNumber();
 
   if (!address) return null;
 
@@ -34,6 +36,8 @@ export const WalletDetails = () => {
             {balance && `${formatUnits(balance.value, balance.decimals)} ${balance.symbol}`}
           </span>
         </Row>
+
+        {blockData && <Row label="Block">{blockData.data.blockNumber.toLocaleString()}</Row>}
 
         <div className="border-t border-grey-light pt-4">
           <NetworkSwitcher />

@@ -1,85 +1,14 @@
-import { createRequire } from 'module';
-
-import {
-  OpenAPIRegistry,
-  OpenApiGeneratorV3,
-  extendZodWithOpenApi
-} from '@asteasolutions/zod-to-openapi';
 import { apiReference } from '@scalar/express-api-reference';
 import { Router } from 'express';
-import { z } from 'zod';
 
-extendZodWithOpenApi(z);
-
-const { version } = createRequire(import.meta.url)('../../package.json') as {
-  version: string;
-};
-
-const registry = new OpenAPIRegistry();
-
-registry.registerPath({
-  method: 'get',
-  path: '/health-check',
-  summary: 'Liveness check',
-  responses: {
-    200: {
-      description: 'Service is alive',
-      content: {
-        'application/json': {
-          schema: z.object({ success: z.boolean() }).openapi('HealthCheckResponse')
-        }
-      }
-    }
-  }
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/hello',
-  summary: 'Hello world',
-  responses: {
-    200: {
-      description: 'Greeting response',
-      content: {
-        'application/json': {
-          schema: z.object({ message: z.string() }).openapi('HelloResponse')
-        }
-      }
-    }
-  }
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/block-number',
-  summary: 'Current block number',
-  responses: {
-    200: {
-      description: 'Latest block number from the configured RPC endpoint',
-      content: {
-        'application/json': {
-          schema: z
-            .object({ blockNumber: z.number().int().nonnegative() })
-            .openapi('BlockNumberResponse')
-        }
-      }
-    }
-  }
-});
-
-const spec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
-  openapi: '3.0.0',
-  info: {
-    title: 'Example REST API',
-    version,
-    description: 'Stubbed REST API with OpenAPI documentation'
-  },
-  servers: [{ url: '/' }]
-});
+// The committed openapi.json in example-schemas is the canonical spec artifact —
+// the same file orval uses to generate the client. Serving it directly keeps
+// the runtime spec identical to what consumers depend on.
+import spec from '@polygonlabs/example-schemas/openapi.json' with { type: 'json' };
 
 const router = Router();
 
-router.get('/openapi.json', async (_req, res) => {
+router.get('/openapi.json', (_req, res) => {
   res.json(spec);
 });
 

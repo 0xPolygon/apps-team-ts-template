@@ -3,6 +3,9 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  resolve: {
+    conditions: ['source']
+  },
   plugins: [tsconfigPaths(), react()],
   test: {
     environment: 'jsdom',

@@ -8,9 +8,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist node_modules *.tsbuildinfo"
   },
   "dependencies": {
+    "@polygonlabs/example-client": "workspace:*",
+    "@tanstack/react-query": "^5.0.0",
     "@0xsequence/connect": "^6.0.0",
     "@sentry/react": "^10.29.0",
     "@t3-oss/env-core": "^0.13.10",

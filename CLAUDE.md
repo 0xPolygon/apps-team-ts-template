@@ -27,6 +27,16 @@ See `pnpm-workspace.yaml` for workspace configuration.
 - Runtime dependencies are declared in each package's `package.json`
 - Each package has its own `tsconfig.json` extending the root base config
 
+There are three package roles:
+
+| Package | Example | Published | Role |
+|---------|---------|-----------|------|
+| schemas | `example-schemas` | yes | Zod schemas, OpenAPI registry, committed `openapi.json` |
+| client  | `example-client`  | yes | Orval-generated fetch client and React hooks |
+| service | `example-rest-api` | no | Express app, Dockerfile, deployment |
+
+The frontend (`example-frontend`) consumes the client package like any external consumer would.
+
 ## Commands
 
 Root-level scripts are in the root `package.json`. Package-level scripts are in each
@@ -35,12 +45,45 @@ package's `package.json` under `packages/` and can be run with
 
 ## TypeScript Setup
 
-- Runs natively on Node 24 — no `ts-node`, no build step required for development
+- Node 24 runs TypeScript natively — no `ts-node`, no transpiler needed
 - `@tsconfig/node-ts` provides `rewriteRelativeImportExtensions: true`, `erasableSyntaxOnly: true`,
   `verbatimModuleSyntax: true`
 - Import paths use `.ts` extensions (rewritten to `.js` by `tsc` for the `dist/` build)
 - `erasableSyntaxOnly: true` — no TypeScript-only constructor parameter properties allowed
 - `verbatimModuleSyntax: true` — `import type` required for type-only imports
+
+## Build-free Local Development
+
+Workspace library packages (`example-schemas`, `example-client`) export source TypeScript
+via a `source` export condition alongside the compiled `dist/` targets:
+
+```json
+"exports": {
+  ".": {
+    "source": "./src/index.ts",
+    "types":  "./dist/index.d.ts",
+    "import": "./dist/index.js"
+  }
+}
+```
+
+This enables fully build-free local development:
+
+- **Typecheck** (`pnpm run typecheck`) — resolves `.ts` source via `customConditions: ["source"]`
+  in `tsconfig.json`. No `dist/` needed.
+- **Service dev** (`pnpm --filter example-rest-api run dev`) — passes `--conditions source` to
+  Node. Workspace symlinks point outside `node_modules/` so Node's type stripping applies.
+  Changes to library source are visible to the running service immediately — no watchers or
+  rebuilds.
+- **Frontend dev** (`pnpm --filter example-frontend run dev`) — Vite is configured with
+  `resolve.conditions: ["source"]`, picks up `.ts` source directly.
+- **Tests** — Vitest is configured with `ssr.resolve.conditions: ["source"]` (service) and
+  `resolve.conditions: ["source"]` (frontend).
+
+**Docker** requires a build because `pnpm deploy` creates real `node_modules/` copies (no
+symlinks), where Node 24 refuses to strip types. The builder stage runs `pnpm run build`
+before `pnpm deploy`. `pnpm run build` is a recursive `--if-present` call; pnpm runs packages
+in topological order so `example-schemas` compiles before `example-client` automatically.
 
 ## Versioning
 
@@ -78,7 +121,12 @@ exactly what npm consumers get.
 
 ## Adding a New Package
 
-1. Create `packages/<name>/` with `package.json`, `tsconfig.json`, `tsconfig.build.json`
-2. Add `{ "path": "packages/<name>" }` to `references` in root `tsconfig.json`
+1. Create `packages/<name>/` with `package.json`, `tsconfig.json`, and (for publishable
+   packages that emit output) `tsconfig.build.json`
+2. Add a reference in root `tsconfig.json`:
+   - **Publishable library** (`composite: true` in `tsconfig.build.json`):
+     `{ "path": "packages/<name>/tsconfig.build.json" }`
+   - **Service or frontend** (no `composite`):
+     `{ "path": "packages/<name>" }`
 3. Add runtime dependencies to the package's `package.json`
 4. Run `pnpm install` from the repo root

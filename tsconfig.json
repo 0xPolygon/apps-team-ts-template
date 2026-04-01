@@ -1,4 +1,13 @@
 {
   "extends": ["@tsconfig/node24", "@tsconfig/node-ts"],
-  "compilerOptions": { "noEmit": true, "noUncheckedSideEffectImports": true }
+  "compilerOptions": {
+    "noEmit": true,
+    "noUncheckedSideEffectImports": true,
+    "customConditions": ["source"]
+  },
+  "references": [
+    { "path": "./packages/example-schemas/tsconfig.build.json" },
+    { "path": "./packages/example-client/tsconfig.build.json" },
+    { "path": "./packages/example-rest-api" }
+  ]
 }

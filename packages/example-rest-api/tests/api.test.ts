@@ -1,42 +1,57 @@
 import { JsonRpcProvider, Network } from 'ethers';
 import supertest from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+
+import { createExampleClient } from '@polygonlabs/example-client';
 
 import { getEnv } from '../src/env.ts';
 import { createLogger } from '../src/logger.ts';
 import { getExpressApp } from '../src/server.ts';
 
-// When TEST_BASE_URL is set the same suite runs against a deployed Docker
-// container; otherwise it runs against the local Express app directly.
-//
-// The provider uses staticNetwork so no eth_chainId detection call is made
-// on startup and no background timer is held — the test process exits cleanly.
-const provider = new JsonRpcProvider(getEnv().RPC_URL, undefined, {
-  staticNetwork: Network.from(getEnv().RPC_CHAIN_ID)
+let baseUrl: string;
+let request: ReturnType<typeof supertest>;
+
+beforeAll(async () => {
+  if (process.env.TEST_BASE_URL) {
+    baseUrl = process.env.TEST_BASE_URL;
+    request = supertest(baseUrl);
+    return;
+  }
+
+  const provider = new JsonRpcProvider(getEnv().RPC_URL, undefined, {
+    staticNetwork: Network.from(getEnv().RPC_CHAIN_ID)
+  });
+  const app = getExpressApp(await createLogger(), provider);
+  await new Promise<void>((resolve, reject) => {
+    const server = app.listen(0, () => {
+      const addr = server.address() as { port: number };
+      baseUrl = `http://localhost:${addr.port}`;
+      request = supertest(baseUrl);
+      resolve();
+    });
+    server.on('error', reject);
+  });
 });
-const request = process.env.TEST_BASE_URL
-  ? supertest(process.env.TEST_BASE_URL)
-  : supertest(getExpressApp(await createLogger(), provider));
 
 describe('API', () => {
   describe('GET /health-check', () => {
     it('should return success', async () => {
-      const { body } = await request.get('/health-check').expect(200);
-      expect(body).property('success', true);
+      const result = await createExampleClient(baseUrl).getHealthCheck();
+      expect(result.data).property('success', true);
     });
   });
 
   describe('GET /api/hello', () => {
     it('should return greeting', async () => {
-      const { body } = await request.get('/api/hello').expect(200);
-      expect(body).property('message', 'Hello, world!');
+      const result = await createExampleClient(baseUrl).getHello();
+      expect(result.data).property('message', 'Hello, world!');
     });
   });
 
   describe('GET /api/block-number', { timeout: 10000 }, () => {
     it('returns the current block number from the RPC', async () => {
-      const { body } = await request.get('/api/block-number').expect(200);
-      expect(body).property('blockNumber').greaterThan(0);
+      const result = await createExampleClient(baseUrl).getBlockNumber();
+      expect(result.data).property('blockNumber').greaterThan(0);
     });
   });
 
