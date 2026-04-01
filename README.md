@@ -5,12 +5,14 @@ three-package schemas/service/client pattern with build-free local development.
 
 ## Packages
 
-| Package | npm | Description |
-|---------|-----|-------------|
-| `packages/example-schemas` | `@polygonlabs/example-schemas` | Zod response schemas, OpenAPI registry, committed `openapi.json` |
-| `packages/example-client` | `@polygonlabs/example-client` | Orval-generated fetch client and TanStack Query hooks |
-| `packages/example-rest-api` | — (private) | Express REST API service with Dockerfile |
-| `packages/example-frontend` | — (private) | React + Vite frontend using the client package |
+| Package | Description |
+|---------|-------------|
+| `packages/example-schemas` | Zod response schemas, OpenAPI registry, committed `openapi.json` |
+| `packages/example-client` | Orval-generated fetch client and TanStack Query hooks |
+| `packages/example-rest-api` | Express REST API service with Dockerfile |
+| `packages/example-frontend` | React + Vite frontend using the client package |
+
+All packages are private — this repo is a reference implementation, not a publishable library.
 
 ## What's Included
 
@@ -66,6 +68,35 @@ pnpm --filter example-frontend run dev
 | `pnpm --filter <name> run build` | Compile to `dist/` |
 | `pnpm --filter <name> run clean` | Remove build artifacts and node_modules |
 
+## Service Architecture
+
+`example-rest-api` demonstrates two patterns beyond the basic Express setup:
+
+**Background polling with `NetworkService<T>`** (`src/services/NetworkService.ts`):
+Rather than calling the RPC on every request, the service polls on a fixed interval and
+caches the result. `get()` returns the cached value immediately if available, or awaits
+the in-flight initial poll — the first request waits at most one RPC round-trip, all
+subsequent requests are served from cache with no latency.
+
+```text
+listen()
+  → NetworkService<number> created (fires first poll immediately)
+  → Cron polls every 5s, updates cache
+GET /api/block-number
+  → blockNumberService.get() returns cached value (or awaits first poll)
+  → res.json({ blockNumber })
+```
+
+**`createServer(logger)` and `serverEvents`** (`src/server.ts`):
+The server is created via `createServer(logger)`, which internalises provider creation and
+wires service lifecycle to the HTTP server. `serverEvents` emits `cronRegistered` after
+`listen()` so test helpers or other consumers can capture the cron handle.
+
+**Test helper pattern** (`tests/helpers/agent.ts`, `tests/env.ts`):
+`getAgent()` returns `{ agent, baseUrl }` — a supertest agent and the URL it targets.
+When `TEST_BASE_URL` is set the same tests run against a deployed instance (e.g. a Docker
+container). The server is started once on `listen(0)` and reused for the file's lifetime.
+
 ## How the Three-Package Pattern Works
 
 ```text
@@ -87,8 +118,8 @@ reviewable diffs and CI can detect drift.
 ## Build-free Local Development
 
 Workspace library packages export a `source` condition pointing to `.ts` source alongside
-the compiled `dist/` targets. Combined with `customConditions: ["source"]` in `tsconfig.json`
-and `--conditions source` in dev scripts, this means:
+the compiled `dist/` targets. Combined with `customConditions: ["@polygonlabs/source"]` in `tsconfig.json`
+and `--conditions @polygonlabs/source` in dev scripts, this means:
 
 - `pnpm run typecheck` — works on a fresh checkout with no `dist/`
 - `pnpm run lint` — works on a fresh checkout with no `dist/`
@@ -101,7 +132,7 @@ Docker is the only context that requires a build, because `pnpm deploy` creates 
 
 ## After Cloning This Template
 
-1. Rename packages: `example-schemas` → `<service>-schemas`, `example-client` → `<service>-client`, `example-rest-api` → `<service>`
+1. Rename packages: `example-schemas` → `<service>-schemas`, `example-client` → `<service>-client`, `example-rest-api` → `<service>`, `example-frontend` → your frontend name (or delete if not needed)
 2. Update `package.json` `name` fields and the root workspace `name`
 3. Replace example Zod schemas and routes with your actual API surface
 4. Update `src/env.ts` in each package for your environment variables

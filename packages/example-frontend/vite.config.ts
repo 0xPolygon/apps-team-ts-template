@@ -5,7 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   resolve: {
-    conditions: ['source']
+    conditions: ['@polygonlabs/source']
   },
   plugins: [
     tsconfigPaths(),

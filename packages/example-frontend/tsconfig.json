@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
-    "customConditions": ["source"],
+    "customConditions": ["@polygonlabs/source"],
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "paths": {

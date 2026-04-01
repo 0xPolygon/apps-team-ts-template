@@ -3,42 +3,25 @@
   "version": "0.1.0",
   "description": "Type-safe REST client for the Example REST API",
   "type": "module",
+  "private": true,
   "packageManager": "pnpm@10.30.3",
-  "publishConfig": {
-    "access": "public",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      },
-      "./react": {
-        "types": "./dist/react.d.ts",
-        "import": "./dist/react.js"
-      }
-    }
-  },
   "exports": {
     ".": {
-      "source": "./src/index.ts",
+      "@polygonlabs/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./react": {
-      "source": "./src/react.ts",
+      "@polygonlabs/source": "./src/react.ts",
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
     }
   },
-  "files": [
-    "dist",
-    "MIGRATION.md"
-  ],
   "scripts": {
     "generate": "orval --config orval.config.ts && node scripts/fix-extensions.ts",
     "build": "pnpm run generate && tsc -p tsconfig.build.json",
-    "prepublishOnly": "pnpm run build",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist src/generated node_modules *.tsbuildinfo"
+    "clean": "rm -rf dist node_modules *.tsbuildinfo"
   },
   "devDependencies": {
     "@polygonlabs/example-schemas": "workspace:*",

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "noUncheckedSideEffectImports": true,
-    "customConditions": ["source"]
+    "customConditions": ["@polygonlabs/source"]
   },
   "references": [
     { "path": "./packages/example-schemas/tsconfig.build.json" },

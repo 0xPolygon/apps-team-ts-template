@@ -60,7 +60,7 @@ via a `source` export condition alongside the compiled `dist/` targets:
 ```json
 "exports": {
   ".": {
-    "source": "./src/index.ts",
+    "@polygonlabs/source": "./src/index.ts",
     "types":  "./dist/index.d.ts",
     "import": "./dist/index.js"
   }
@@ -69,16 +69,16 @@ via a `source` export condition alongside the compiled `dist/` targets:
 
 This enables fully build-free local development:
 
-- **Typecheck** (`pnpm run typecheck`) — resolves `.ts` source via `customConditions: ["source"]`
+- **Typecheck** (`pnpm run typecheck`) — resolves `.ts` source via `customConditions: ["@polygonlabs/source"]`
   in `tsconfig.json`. No `dist/` needed.
-- **Service dev** (`pnpm --filter example-rest-api run dev`) — passes `--conditions source` to
+- **Service dev** (`pnpm --filter example-rest-api run dev`) — passes `--conditions @polygonlabs/source` to
   Node. Workspace symlinks point outside `node_modules/` so Node's type stripping applies.
   Changes to library source are visible to the running service immediately — no watchers or
   rebuilds.
 - **Frontend dev** (`pnpm --filter example-frontend run dev`) — Vite is configured with
-  `resolve.conditions: ["source"]`, picks up `.ts` source directly.
-- **Tests** — Vitest is configured with `ssr.resolve.conditions: ["source"]` (service) and
-  `resolve.conditions: ["source"]` (frontend).
+  `resolve.conditions: ["@polygonlabs/source"]`, picks up `.ts` source directly.
+- **Tests** — Vitest is configured with `ssr.resolve.conditions: ["@polygonlabs/source"]` (service) and
+  `resolve.conditions: ["@polygonlabs/source"]` (frontend).
 
 **Docker** requires a build because `pnpm deploy` creates real `node_modules/` copies (no
 symlinks), where Node 24 refuses to strip types. The builder stage runs `pnpm run build`

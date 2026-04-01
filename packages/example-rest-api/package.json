@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "start": "node src/index.ts",
-    "dev": "dotenvx run -- node --conditions source src/index.ts",
+    "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
     "test": "dotenvx run --env-file .env.test -- vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist node_modules *.tsbuildinfo"
@@ -19,6 +19,7 @@
     "@sentry/node": "^10.0.0",
     "@t3-oss/env-core": "^0.13.10",
     "cors": "^2.8.5",
+    "croner": "^9.0.0",
     "ethers": "^6.16.0",
     "express": "^5.0.0",
     "helmet": "^7.0.0",

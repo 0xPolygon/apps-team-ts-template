@@ -3,42 +3,23 @@
   "version": "0.1.0",
   "description": "Zod response schemas, OpenAPI registry, and committed spec for the Example REST API",
   "type": "module",
+  "private": true,
   "packageManager": "pnpm@10.30.3",
-  "publishConfig": {
-    "access": "public",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      },
-      "./registry": {
-        "types": "./dist/registry.d.ts",
-        "import": "./dist/registry.js"
-      },
-      "./openapi.json": "./openapi.json"
-    }
-  },
   "exports": {
     ".": {
-      "source": "./src/index.ts",
+      "@polygonlabs/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./registry": {
-      "source": "./src/registry.ts",
+      "@polygonlabs/source": "./src/registry.ts",
       "types": "./dist/registry.d.ts",
       "import": "./dist/registry.js"
     },
     "./openapi.json": "./openapi.json"
   },
-  "files": [
-    "dist",
-    "openapi.json",
-    "MIGRATION.md"
-  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
-    "prepublishOnly": "pnpm run build",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist node_modules *.tsbuildinfo"
   },

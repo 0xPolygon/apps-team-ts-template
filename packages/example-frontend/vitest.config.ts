@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
-    conditions: ['source']
+    conditions: ['@polygonlabs/source']
   },
   plugins: [tsconfigPaths(), react()],
   test: {
