@@ -8,6 +8,7 @@
   "references": [
     { "path": "./packages/example-schemas/tsconfig.build.json" },
     { "path": "./packages/example-client/tsconfig.build.json" },
-    { "path": "./packages/example-rest-api" }
+    { "path": "./packages/example-rest-api" },
+    { "path": "./packages/example-frontend" }
   ]
 }
