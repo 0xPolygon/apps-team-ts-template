@@ -1,5 +1,37 @@
 # example-rest-api
 
+## 0.2.1
+
+### Patch Changes
+
+- 04a0ef4: Replace the per-request RPC call on `/api/block-number` with a background polling service.
+
+  `NetworkService<T>` polls the RPC every 5 seconds using a croner job and caches the result
+  in memory. The route handler calls `service.get()` which returns the cached value immediately
+  if available, or awaits the in-flight initial poll — so the first request never blocks longer
+  than one RPC round-trip and subsequent requests are served from cache with no RPC latency.
+
+  `server.ts` now exports `createServer(logger)` instead of `getExpressApp(logger, provider)`,
+  internalising provider creation and wiring the NetworkService lifecycle to the http.Server.
+  `serverEvents` emits `cronRegistered` after `listen()` so subscribers can capture the cron
+  handle. `tests/helpers/agent.ts` and `tests/env.ts` follow the pos-airdrop pattern:
+  `getAgent()` returns `{ agent, baseUrl }` with the server started once and reused across
+  all tests in the file.
+
+- a2de5fe: Add `example-schemas` and `example-client` packages to implement the three-package monorepo pattern.
+
+  `example-schemas` publishes Zod response schemas, an OpenAPI registry, and a committed `openapi.json`
+  spec. `example-client` consumes the spec via orval to generate a typed fetch client and TanStack
+  Query hooks. `example-rest-api` now imports schemas from the shared package and its tests assert
+  against the typed client. `example-frontend` uses the client's React hooks to display the current
+  block number.
+
+  This establishes the template as the canonical reference for the schemas/service/client pattern
+  documented in `apps-team-ops/docs/best-practices/backend.md`.
+
+- Updated dependencies [a2de5fe]
+  - @polygonlabs/example-schemas@0.2.0
+
 ## 0.2.0
 
 ### Minor Changes
