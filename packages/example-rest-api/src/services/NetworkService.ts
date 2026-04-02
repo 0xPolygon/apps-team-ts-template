@@ -22,7 +22,11 @@ export class NetworkService<T> {
   constructor(fetchFn: FetchFn<T>, intervalSecs: number, label: string, logger: Logger) {
     this.fetchFn = fetchFn;
     this.label = label;
-    this.poll();
+    // Suppress the rejection on the initial poll — no croner catch handler is
+    // active yet and no get() caller has attached to activePoll. Subsequent
+    // polls run inside croner, which catches and logs rejections via the catch
+    // option below.
+    this.poll().catch(() => {});
 
     this.job = new Cron(
       `*/${intervalSecs} * * * * *`,
@@ -31,11 +35,11 @@ export class NetworkService<T> {
         unref: true,
         catch: (err: unknown) => logger.error({ err, label: this.label }, 'poll failed')
       },
-      () => this.poll()
+      () => this.poll().then(() => {})
     );
   }
 
-  private poll(): void {
+  private poll(): Promise<T> {
     const p = this.fetchFn()
       .then((result) => {
         this.state = result;
@@ -44,13 +48,8 @@ export class NetworkService<T> {
       .finally(() => {
         if (this.activePoll === p) this.activePoll = null;
       });
-    // Prevent an unhandled-rejection crash if the error fires before any
-    // caller has awaited get(). The rejection still propagates to get()
-    // callers because they receive the same promise.
-    p.catch(() => {
-      // Intentionally empty — errors are logged by the cron catch handler.
-    });
     this.activePoll = p;
+    return p;
   }
 
   async get(): Promise<T> {
