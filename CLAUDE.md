@@ -31,8 +31,8 @@ There are three package roles:
 
 | Package | Example | Published | Role |
 |---------|---------|-----------|------|
-| schemas | `example-schemas` | yes | Zod schemas, OpenAPI registry, committed `openapi.json` |
-| client  | `example-client`  | yes | Orval-generated fetch client and React hooks |
+| schemas | `example-schemas` | no | Zod schemas, OpenAPI registry, committed `openapi.json` |
+| client  | `example-client`  | no | Orval-generated fetch client and React hooks |
 | service | `example-rest-api` | no | Express app, Dockerfile, deployment |
 
 The frontend (`example-frontend`) consumes the client package like any external consumer would.
