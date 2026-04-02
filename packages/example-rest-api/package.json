@@ -3,23 +3,23 @@
   "version": "0.2.0",
   "type": "module",
   "private": true,
-  "main": "dist/index.js",
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
     "start": "node src/index.ts",
-    "build": "tsc -p tsconfig.build.json",
-    "dev": "dotenvx run -- node src/index.ts",
+    "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
     "test": "dotenvx run --env-file .env.test -- vitest run",
     "typecheck": "tsc --noEmit",
-    "prePublishOnly": "pnpm run build"
+    "clean": "rm -rf dist node_modules *.tsbuildinfo"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^8.4.1",
+    "@polygonlabs/example-schemas": "workspace:*",
     "@polygonlabs/logger": "^1.0.1",
     "@polygonlabs/verror": "^1.0.0",
     "@scalar/express-api-reference": "^0.8.46",
     "@sentry/node": "^10.0.0",
     "@t3-oss/env-core": "^0.13.10",
     "cors": "^2.8.5",
+    "croner": "^9.0.0",
     "ethers": "^6.16.0",
     "express": "^5.0.0",
     "helmet": "^7.0.0",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.0.0",
+    "@polygonlabs/example-client": "workspace:*",
     "@tsconfig/node-ts": "^23.0.0",
     "@tsconfig/node24": "^24.0.0",
     "@types/cors": "^2.8.17",
@@ -41,13 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/0xPolygon/apps-team-ts-template.git"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "MIGRATION.md",
-    "src/"
-  ]
+    "url": "https://github.com/0xPolygon/apps-team-ts-template.git",
+    "directory": "packages/example-rest-api"
+  }
 }

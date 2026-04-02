@@ -1,0 +1,41 @@
+{
+  "name": "@polygonlabs/example-schemas",
+  "version": "0.1.0",
+  "description": "Zod response schemas, OpenAPI registry, and committed spec for the Example REST API",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "exports": {
+    ".": {
+      "@polygonlabs/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./registry": {
+      "@polygonlabs/source": "./src/registry.ts",
+      "types": "./dist/registry.d.ts",
+      "import": "./dist/registry.js"
+    },
+    "./openapi.json": "./openapi.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist node_modules *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.4.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tsconfig/node-ts": "^23.0.0",
+    "@tsconfig/node24": "^24.0.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xPolygon/apps-team-ts-template.git",
+    "directory": "packages/example-schemas"
+  }
+}

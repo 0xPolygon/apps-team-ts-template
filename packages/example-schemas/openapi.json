@@ -1,0 +1,103 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Example REST API",
+    "version": "0.1.0",
+    "description": "Stubbed REST API demonstrating the schemas/service/client monorepo pattern."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "HealthCheckResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": ["success"]
+      },
+      "HelloResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"]
+      },
+      "BlockNumberResponse": {
+        "type": "object",
+        "properties": {
+          "blockNumber": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["blockNumber"]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/health-check": {
+      "get": {
+        "operationId": "getHealthCheck",
+        "summary": "Liveness check",
+        "responses": {
+          "200": {
+            "description": "Service is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hello": {
+      "get": {
+        "operationId": "getHello",
+        "summary": "Hello world",
+        "responses": {
+          "200": {
+            "description": "Greeting response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/block-number": {
+      "get": {
+        "operationId": "getBlockNumber",
+        "summary": "Current block number",
+        "description": "Returns the latest block number from the configured RPC endpoint.",
+        "responses": {
+          "200": {
+            "description": "Latest block number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockNumberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

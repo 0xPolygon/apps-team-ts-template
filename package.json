@@ -24,7 +24,8 @@
     "lint:ts": "eslint .",
     "format": "pnpm run format:md && pnpm run format:ts && prettier --write .",
     "format:md": "markdownlint-cli2 --fix \"**/*.md\"",
-    "format:ts": "eslint . --fix"
+    "format:ts": "eslint . --fix",
+    "clean": "pnpm -r run clean && rm -rf node_modules"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
