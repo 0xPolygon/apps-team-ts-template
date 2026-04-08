@@ -19,9 +19,9 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # env:                                          # Declare service-specific test vars here.
-    #   MY_RPC: https://...?token=${{ secrets.MY_TOKEN }}  # Values composed from secrets.
-    # Pass the var names to test_vars below so the action forwards them to the container.
+    env:
+      RPC_URL: https://rpc.polygon.tools/internal/evm/137
+      RPC_CHAIN_ID: '137'
     outputs:
       image_name: ${{ steps.docker-test.outputs.image_name }}
       image_tag: ${{ steps.docker-test.outputs.image_tag }}
@@ -33,7 +33,7 @@ jobs:
         uses: 0xPolygon/apps-team-workflows/.github/actions/docker-test@main
         with:
           tag: ${{ inputs.tag || '' }}
-          # test_vars: MY_RPC OTHER_VAR   # space-separated env var names to forward to the container
+          test_vars: RPC_URL RPC_CHAIN_ID
 
   release:
     needs: test
