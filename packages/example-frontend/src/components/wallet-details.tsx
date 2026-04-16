@@ -23,7 +23,7 @@ export const WalletDetails = () => {
   if (!address) return null;
 
   return (
-    <Card className="w-full max-w-lg self-start items-stretch gap-5">
+    <Card className="w-full items-stretch gap-5">
       <h2 className="text-2xl font-semibold text-foreground">Wallet</h2>
 
       <div className="flex flex-col gap-4">
