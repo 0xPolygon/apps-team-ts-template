@@ -2,13 +2,19 @@ import { useConnection, useDisconnect } from 'wagmi';
 
 import { useOpenConnectModal } from '@0xsequence/connect';
 
+import { useWallet } from '../hooks/use-wallet';
+import { ScwBanner } from './scw-banner';
+import { SendNative } from './send-native';
 import { Button } from './ui/button';
 import { WalletDetails } from './wallet-details';
 
 export const HomeContent = () => {
-  const { isConnected } = useConnection();
+  const { address, isConnected } = useConnection();
   const { mutate: disconnect } = useDisconnect();
   const { setOpenConnectModal } = useOpenConnectModal();
+  const { isSmartContractWallet, isSequenceWallet } = useWallet(address);
+
+  const showScwBanner = isConnected && isSmartContractWallet && !isSequenceWallet;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -24,7 +30,11 @@ export const HomeContent = () => {
 
       <main className="flex flex-1 justify-center px-6 pt-10">
         {isConnected ? (
-          <WalletDetails />
+          <div className="flex w-full max-w-lg flex-col gap-6">
+            {showScwBanner && <ScwBanner />}
+            <WalletDetails />
+            <SendNative />
+          </div>
         ) : (
           <p className="text-grey">Connect a wallet to get started.</p>
         )}
