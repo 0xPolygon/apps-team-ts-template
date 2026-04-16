@@ -11,5 +11,5 @@ even when a valid changeset exists. Unset both before calling
 `changeset status` so push from a worktree is no longer rejected.
 
 Downstream repos that copied this hook from the template (e.g. `lst-api`
-#92) hit the same bug; the fix here is what those downstream copies
+PR #92) hit the same bug; the fix here is what those downstream copies
 should track back to.
