@@ -8,9 +8,10 @@ type FetchFn<T> = () => Promise<T>;
  * Polls a fetch function on a fixed interval and caches the latest result.
  *
  * The first poll fires immediately in the constructor. `get()` returns the
- * cached value if available, or awaits the in-flight poll — so the first call
- * to `get()` naturally waits for the initial fetch to complete rather than
- * returning null or throwing.
+ * cached value if available, awaits any in-flight poll, or triggers a fresh
+ * poll when neither exists — so a failed initial poll does not leave the
+ * service permanently broken until the next cron tick. Callers always either
+ * receive data or the underlying fetch error.
  */
 export class NetworkService<T> {
   private state: T | null = null;
@@ -55,7 +56,11 @@ export class NetworkService<T> {
   async get(): Promise<T> {
     if (this.state !== null) return this.state;
     if (this.activePoll !== null) return this.activePoll;
-    throw new Error(`NetworkService "${this.label}" has no data and no active poll`);
+    // No cached state and no active poll — e.g. the initial poll failed and
+    // the next cron tick hasn't fired yet. Kick off a fresh poll on demand
+    // so the caller either receives data or the underlying fetch error,
+    // rather than a misleading "no data and no active poll" message.
+    return this.poll();
   }
 
   stop(): void {
