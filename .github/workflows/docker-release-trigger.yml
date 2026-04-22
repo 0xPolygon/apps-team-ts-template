@@ -20,8 +20,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      RPC_URL: https://rpc.polygon.tools/internal/evm/137
-      RPC_CHAIN_ID: '137'
+      # Public Ethereum mainnet RPC — no token required. Used here because
+      # the template's docker-test job should exercise the canonical test
+      # flow with a reliable anonymous endpoint. Real services override
+      # this trigger's env block with their own (token-bearing) URLs.
+      RPC_URL: https://ethereum-rpc.publicnode.com
+      RPC_CHAIN_ID: '1'
     outputs:
       image_name: ${{ steps.docker-test.outputs.image_name }}
       image_tag: ${{ steps.docker-test.outputs.image_tag }}

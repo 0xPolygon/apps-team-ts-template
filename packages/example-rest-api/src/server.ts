@@ -1,5 +1,4 @@
 import type { Cron } from 'croner';
-import type { NextFunction, Request, Response } from 'express';
 
 import { randomUUID } from 'node:crypto';
 import { EventEmitter } from 'node:events';
@@ -9,11 +8,12 @@ import { JsonRpcProvider, Network } from 'ethers';
 import express, { json } from 'express';
 import helmet from 'helmet';
 
-import { HTTPError, NotFound } from '@polygonlabs/verror';
+import { NotFound } from '@polygonlabs/verror';
 
 import type { Logger } from './logger.ts';
 
 import { getEnv } from './env.ts';
+import { createErrorHandler } from './errors.ts';
 import { buildRouter } from './routes/index.ts';
 import { NetworkService } from './services/NetworkService.ts';
 
@@ -93,20 +93,10 @@ export function createServer(logger: Logger) {
       res.status(404).json({ error: true, message: err.message });
     });
 
-    // Global error handler — must declare all four parameters so Express
-    // recognises it as an error-handling middleware, not a regular handler.
-    // Only log server errors (>=500); 4xx are client errors and expected.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
-      const status = err instanceof HTTPError ? err.statusCode : 500;
-
-      if (status >= 500) {
-        req.log.debug({ err }, 'unhandled error');
-      }
-
-      const message = err instanceof Error ? err.message : 'Internal server error';
-      res.status(status).json({ error: true, message });
-    });
+    // Global error handler — sanitises ethers fetch errors (which embed RPC
+    // URLs including auth tokens) before either logging or responding. See
+    // src/errors.ts for the detection and sanitisation logic.
+    app.use(createErrorHandler());
 
     const server = _listen(...args);
     server.on('close', () => {
