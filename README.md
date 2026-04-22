@@ -1,5 +1,9 @@
 # apps-team-ts-template
 
+[![CI](https://github.com/0xPolygon/apps-team-ts-template/actions/workflows/ci-trigger.yml/badge.svg)](https://github.com/0xPolygon/apps-team-ts-template/actions/workflows/ci-trigger.yml)
+[![Release](https://github.com/0xPolygon/apps-team-ts-template/actions/workflows/npm-release-trigger.yml/badge.svg)](https://github.com/0xPolygon/apps-team-ts-template/actions/workflows/npm-release-trigger.yml)
+[![Docker release](https://github.com/0xPolygon/apps-team-ts-template/actions/workflows/docker-release-trigger.yml/badge.svg)](https://github.com/0xPolygon/apps-team-ts-template/actions/workflows/docker-release-trigger.yml)
+
 Monorepo template for Polygon Apps Team TypeScript services. Implements the
 three-package schemas/service/client pattern with build-free local development.
 
