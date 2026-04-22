@@ -1,5 +1,13 @@
 # example-rest-api
 
+## 0.2.2
+
+### Patch Changes
+
+- 297dc24: Exercise every package bump through the migrated pipelines-backed workflows (CI, npm release, Docker release). No runtime or API change.
+- Updated dependencies [297dc24]
+  - @polygonlabs/example-schemas@0.2.1
+
 ## 0.2.1
 
 ### Patch Changes
