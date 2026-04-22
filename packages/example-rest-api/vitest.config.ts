@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     include: ['tests/**/*.test.ts'],
+    setupFiles: ['./vitest.setup.ts'],
     ...(process.env.CI ? { reporters: ['verbose'] as const } : {})
   }
 });

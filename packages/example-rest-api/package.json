@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/index.ts",
     "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
-    "test": "dotenvx run --env-file .env.test -- vitest run",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist node_modules *.tsbuildinfo"
   },
