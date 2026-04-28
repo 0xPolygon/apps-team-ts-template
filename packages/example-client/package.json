@@ -1,6 +1,6 @@
 {
   "name": "@polygonlabs/example-client",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Type-safe REST client for the Example REST API",
   "type": "module",
   "private": true,
