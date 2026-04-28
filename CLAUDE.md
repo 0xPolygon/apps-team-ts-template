@@ -135,16 +135,48 @@ pnpm --filter @polygonlabs/example-schemas run build
 pnpm --filter @polygonlabs/example-client run generate
 ```
 
-The plugin's codegen-time audit dynamic-imports `@polygonlabs/example-schemas`,
-so it must resolve at generate time — building the schemas package is the
-straightforward way to satisfy that. CI handles this automatically because
-`pnpm -r --if-present run build` runs in topological order.
+### The `@polygonlabs/source` codegen wrinkle
+
+This monorepo ships a build-free dev story via the `@polygonlabs/source`
+custom export condition — workspace tsconfigs, vitest configs, and the
+service `dev` script all read `.ts` source directly without producing a
+`dist/`. The hey-api codegen step has a different resolution profile:
+
+- The plugin's audit runs `await import('@polygonlabs/example-schemas')`
+  from inside `node_modules/@polygonlabs/zod-to-openapi-heyapi/dist/` —
+  Node's default resolution. The `@polygonlabs/source` condition is
+  **not** active for that dynamic import unless the openapi-ts process
+  was started with `--conditions=@polygonlabs/source` (or
+  `NODE_OPTIONS='--conditions=@polygonlabs/source'`).
+- So in practice, `pnpm --filter @polygonlabs/example-client run generate`
+  needs a built `dist/` for the schemas package — Node falls through to
+  the package's `import` export condition, which resolves to
+  `./dist/index.js`. This is the case CI handles automatically (root
+  `pnpm -r --if-present run build` runs in topological order, schemas
+  before client).
+
+For local iteration, the build step shown above before the generate
+covers it. If you want the codegen to read source directly without a
+schemas rebuild, run:
+
+```bash
+NODE_OPTIONS='--conditions=@polygonlabs/source' \
+  pnpm --filter @polygonlabs/example-client run generate
+```
+
+This isn't a plugin-side concern — the plugin's error message hints at
+the workaround when the dynamic import fails — but it's specific enough
+to this repo's build-free story that it's worth documenting here.
 
 `packages/example-client/src/generated/` is committed and gated by the
 package's `codegen-drift-check` script — drift surfaces in PR diffs.
 
-See `packages/zod-to-openapi-heyapi/README.md` in `apps-team-packages` for
-the plugin's full design and option semantics.
+The repo's `sonar-project.properties` excludes `**/src/generated/**`
+from analysis and coverage so the snapshot doesn't dominate Sonar
+issue counts.
+
+See `packages/zod-to-openapi-heyapi/README.md` in `apps-team-packages`
+for the plugin's full design, option semantics, and migration notes.
 
 ## Adding a New Package
 
