@@ -14,5 +14,14 @@
 // React-flavoured TanStack Query options factories (`getBlockNumberOptions`
 // etc.) live in the `./react` subpath export so consumers that don't need
 // React don't pay the @tanstack/react-query peer-dep cost.
+//
+// For advanced setups that need more than the singleton client — multiple
+// instances pointing at different base URLs, per-request config in SSR, a
+// custom fetch adapter — import `createClient` and `createConfig` from the
+// `./factory` subpath:
+//
+//   import { createClient, createConfig } from '@polygonlabs/example-client/factory';
+//   const myClient = createClient(createConfig({ baseUrl, fetch: customFetch }));
+//   await getBlockNumber({ client: myClient });
 export { client } from './generated/client.gen.ts';
 export { getBlockNumber, getHealthCheck, getHello } from './generated/sdk.gen.ts';

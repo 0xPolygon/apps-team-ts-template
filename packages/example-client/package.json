@@ -11,6 +11,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./factory": {
+      "@polygonlabs/source": "./src/generated/client/index.ts",
+      "types": "./dist/generated/client/index.d.ts",
+      "import": "./dist/generated/client/index.js"
+    },
     "./react": {
       "@polygonlabs/source": "./src/react.ts",
       "types": "./dist/react.d.ts",
