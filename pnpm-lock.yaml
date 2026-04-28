@@ -56,9 +56,6 @@ importers:
 
   packages/example-client:
     dependencies:
-      '@hey-api/client-fetch':
-        specifier: ^0.13.0
-        version: 0.13.1(@hey-api/openapi-ts@0.95.0(typescript@5.9.3))
       '@polygonlabs/example-schemas':
         specifier: workspace:*
         version: link:../example-schemas
@@ -70,8 +67,8 @@ importers:
         specifier: ^0.95.0
         version: 0.95.0(typescript@5.9.3)
       '@polygonlabs/zod-to-openapi-heyapi':
-        specifier: ^1.0.0
-        version: 1.0.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@hey-api/openapi-ts@0.95.0(typescript@5.9.3))(zod@4.3.6)
+        specifier: ^1.1.0
+        version: 1.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@hey-api/openapi-ts@0.95.0(typescript@5.9.3))(zod@4.3.6)
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.91.0(react@19.2.4)
@@ -1102,12 +1099,6 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@hey-api/client-fetch@0.13.1':
-    resolution: {integrity: sha512-29jBRYNdxVGlx5oewFgOrkulZckpIpBIRHth3uHFn1PrL2ucMy52FvWOY3U3dVx2go1Z3kUmMi6lr07iOpUqqA==}
-    deprecated: Starting with v0.73.0, this package is bundled directly inside @hey-api/openapi-ts.
-    peerDependencies:
-      '@hey-api/openapi-ts': < 2
-
   '@hey-api/codegen-core@0.7.4':
     resolution: {integrity: sha512-DGd9yeSQzflOWO3Y5mt1GRXkXH9O/yIMgbxPjwLI3jwu/3nAjoXXD26lEeFb6tclYlg0JAqTIs5d930G/qxHeA==}
     engines: {node: '>=20.19.0'}
@@ -1616,8 +1607,8 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  '@polygonlabs/zod-to-openapi-heyapi@1.0.0':
-    resolution: {integrity: sha512-dnzHO6yIxUvfPNAieS9KAzWdXjegGMW87UMs7XZLxk7NJyt1ve+Pt4ZCU5RL1Y18RxGAgk08gSd9rtXIen672g==}
+  '@polygonlabs/zod-to-openapi-heyapi@1.1.0':
+    resolution: {integrity: sha512-VeTDm1/IF+su9QSesytlJOy6t2dvpBv32ml2PDlfQ8gm56UWAX40RZxSpeCVS8GesrlaUJnrKyhG7/8DLr4b0Q==}
     peerDependencies:
       '@asteasolutions/zod-to-openapi': ^8.0.0
       '@hey-api/openapi-ts': '>=0.95.0'
@@ -8154,10 +8145,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@hey-api/client-fetch@0.13.1(@hey-api/openapi-ts@0.95.0(typescript@5.9.3))':
-    dependencies:
-      '@hey-api/openapi-ts': 0.95.0(typescript@5.9.3)
-
   '@hey-api/codegen-core@0.7.4':
     dependencies:
       '@hey-api/types': 0.1.4
@@ -8856,7 +8843,7 @@ snapshots:
     dependencies:
       zod: 4.3.6
 
-  '@polygonlabs/zod-to-openapi-heyapi@1.0.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@hey-api/openapi-ts@0.95.0(typescript@5.9.3))(zod@4.3.6)':
+  '@polygonlabs/zod-to-openapi-heyapi@1.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@hey-api/openapi-ts@0.95.0(typescript@5.9.3))(zod@4.3.6)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.4.2(zod@4.3.6)
       '@hey-api/openapi-ts': 0.95.0(typescript@5.9.3)
