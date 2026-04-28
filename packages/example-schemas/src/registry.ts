@@ -1,10 +1,6 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
-import {
-  BlockNumberResponseSchema,
-  HealthCheckResponseSchema,
-  HelloResponseSchema
-} from './schemas.ts';
+import { BlockNumberResponse, HealthCheckResponse, HelloResponse } from './schemas.ts';
 
 export function buildRegistry(): OpenAPIRegistry {
   const registry = new OpenAPIRegistry();
@@ -17,7 +13,7 @@ export function buildRegistry(): OpenAPIRegistry {
     responses: {
       200: {
         description: 'Service is alive',
-        content: { 'application/json': { schema: HealthCheckResponseSchema } }
+        content: { 'application/json': { schema: HealthCheckResponse } }
       }
     }
   });
@@ -30,7 +26,7 @@ export function buildRegistry(): OpenAPIRegistry {
     responses: {
       200: {
         description: 'Greeting response',
-        content: { 'application/json': { schema: HelloResponseSchema } }
+        content: { 'application/json': { schema: HelloResponse } }
       }
     }
   });
@@ -44,7 +40,7 @@ export function buildRegistry(): OpenAPIRegistry {
     responses: {
       200: {
         description: 'Latest block number',
-        content: { 'application/json': { schema: BlockNumberResponseSchema } }
+        content: { 'application/json': { schema: BlockNumberResponse } }
       }
     }
   });
