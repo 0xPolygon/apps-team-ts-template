@@ -1,33 +1,38 @@
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { createExampleClient } from '@polygonlabs/example-client';
+import { client, getBlockNumber, getHealthCheck, getHello } from '@polygonlabs/example-client';
 
 import { closeAgent, getAgent } from './helpers/agent.ts';
 
 afterAll(() => closeAgent());
 
 const { agent, baseUrl } = getAgent();
-const client = createExampleClient(baseUrl);
+client.setConfig({ baseUrl });
 
 describe('API', () => {
   describe('GET /health-check', () => {
     it('should return success', async () => {
-      const result = await client.getHealthCheck();
-      expect(result.data).property('success', true);
+      const { data } = await getHealthCheck();
+      expect(data).property('success', true);
     });
   });
 
   describe('GET /api/hello', () => {
     it('should return greeting', async () => {
-      const result = await client.getHello();
-      expect(result.data).property('message', 'Hello, world!');
+      const { data } = await getHello();
+      expect(data).property('message', 'Hello, world!');
     });
   });
 
   describe('GET /api/block-number', { timeout: 10000 }, () => {
-    it('returns the current block number from the RPC', async () => {
-      const result = await client.getBlockNumber();
-      expect(result.data).property('blockNumber').greaterThan(0);
+    it('returns the current block number from the RPC, decoded to bigint', async () => {
+      const { data } = await getBlockNumber();
+      // Int64Codec decodes the wire string to a bigint before reaching the
+      // caller — the generated transformer runs `BlockNumberResponse.parseAsync`
+      // on the response body and replaces `data` with its output.
+      expect(data).property('blockNumber');
+      expect(typeof data!.blockNumber).toBe('bigint');
+      expect(data!.blockNumber > 0n).toBe(true);
     });
   });
 

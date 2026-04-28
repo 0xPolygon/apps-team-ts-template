@@ -1,4 +1,11 @@
 {
   "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // DOM lib is needed because tests import @polygonlabs/example-client,
+    // whose generated client references fetch globals (BodyInit, etc.) from
+    // @hey-api/client-fetch. Adding DOM here keeps the client typecheckable
+    // when consumed in source mode via the @polygonlabs/source condition.
+    "lib": ["es2024", "DOM", "DOM.Iterable"]
+  },
   "include": ["src/**/*.ts", "tests/**/*.ts", "vitest.config.ts", "vitest.setup.ts"]
 }

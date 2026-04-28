@@ -37,7 +37,7 @@ export const WalletDetails = () => {
           </span>
         </Row>
 
-        {blockData && <Row label="Block">{blockData.data.blockNumber.toLocaleString()}</Row>}
+        {blockData && <Row label="Block">{blockData.blockNumber.toLocaleString()}</Row>}
 
         <div className="border-t border-grey-light pt-4">
           <NetworkSwitcher />

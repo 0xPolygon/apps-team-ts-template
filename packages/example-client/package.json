@@ -18,20 +18,27 @@
     }
   },
   "scripts": {
-    "generate": "orval --config orval.config.ts && node scripts/fix-extensions.ts",
+    "generate": "openapi-ts -f openapi-ts.config.ts",
     "build": "pnpm run generate && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules *.tsbuildinfo"
+    "codegen-drift-check": "pnpm run generate && git diff --exit-code -- src/generated",
+    "clean": "rm -rf dist node_modules src/generated *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.13.0",
+    "@polygonlabs/example-schemas": "workspace:*"
   },
   "devDependencies": {
-    "@polygonlabs/example-schemas": "workspace:*",
+    "@asteasolutions/zod-to-openapi": "^8.4.1",
+    "@hey-api/openapi-ts": "^0.95.0",
+    "@polygonlabs/zod-to-openapi-heyapi": "^1.0.0",
     "@tanstack/react-query": "^5.0.0",
     "@tsconfig/node-ts": "^23.0.0",
     "@tsconfig/node24": "^24.0.0",
     "@types/node": "^24.0.0",
-    "orval": "^8.5.2",
     "react": "^19.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "zod": "^4.3.6"
   },
   "peerDependencies": {
     "@tanstack/react-query": ">=5.0.0",
