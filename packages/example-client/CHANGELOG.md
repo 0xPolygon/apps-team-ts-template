@@ -1,5 +1,11 @@
 # @polygonlabs/example-client
 
+## 0.2.2
+
+### Patch Changes
+
+- 06b7d1d: Document why `setBaseUrl` strips trailing slashes — the generated paths always start with `/`, so removing any trailing slash from the base avoids double-slashed URLs at concat time regardless of how the caller writes the base URL.
+
 ## 0.2.1
 
 ### Patch Changes

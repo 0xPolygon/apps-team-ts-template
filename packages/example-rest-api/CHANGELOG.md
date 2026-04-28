@@ -1,5 +1,11 @@
 # example-rest-api
 
+## 0.2.4
+
+### Patch Changes
+
+- 06b7d1d: Document the graceful-shutdown pattern: `server.close()` stops accepting new connections and waits for in-flight requests to drain; `process.exit(0)` inside the close callback ensures the process actually terminates even if non-server handles (timers, open sockets) are still keeping the event loop alive.
+
 ## 0.2.3
 
 ### Patch Changes
