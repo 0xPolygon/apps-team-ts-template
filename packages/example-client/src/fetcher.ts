@@ -4,6 +4,9 @@
 let _baseUrl = '';
 
 export function setBaseUrl(url: string): void {
+  // Strip trailing slash so the generated paths (which always start with `/`)
+  // produce a single-slashed URL when concatenated, regardless of how the
+  // caller writes the base.
   _baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
 }
 
