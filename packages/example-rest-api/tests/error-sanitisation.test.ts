@@ -6,43 +6,21 @@ import { createServer as createHttpServer } from 'node:http';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import type { Logger } from '../src/logger.ts';
+import { createLogger } from '../src/logger.ts';
 
 const SECRET = 'TEST_SECRET_DO_NOT_LEAK_12345';
 
-interface Captured {
-  level: string;
-  obj: unknown;
-  msg: unknown;
-}
-
-function makeCaptureLogger(): { logger: Logger; captured: Captured[] } {
-  const captured: Captured[] = [];
-  const record =
-    (level: string) =>
-    (obj: unknown, msg?: unknown): void => {
-      captured.push({ level, obj, msg });
-    };
-  const log = {
-    trace: record('trace'),
-    debug: record('debug'),
-    info: record('info'),
-    warn: record('warn'),
-    error: record('error'),
-    fatal: record('fatal'),
-    child() {
-      return log;
-    }
-  };
-  return { logger: log as unknown as Logger, captured };
-}
-
+/**
+ * End-to-end check that an ethers fetch error originating from an RPC call
+ * with a `?token=<secret>` query string never reaches the HTTP response body.
+ * The sanitisation itself is tested in @polygonlabs/logger and
+ * @polygonlabs/express — this test only confirms the template wires the
+ * @polygonlabs/express error handler in correctly.
+ */
 describe('global error handler sanitises ethers fetch errors', () => {
   let rpcServer: Server;
-  let rpcPort: number;
   let appServer: Server;
   let baseUrl: string;
-  let captured: Captured[];
 
   beforeAll(async () => {
     rpcServer = createHttpServer((_req, res) => {
@@ -50,7 +28,7 @@ describe('global error handler sanitises ethers fetch errors', () => {
       res.end(JSON.stringify({ error: { code: -32000, message: 'unauthorized' } }));
     });
     await new Promise<void>((resolve) => rpcServer.listen(0, resolve));
-    rpcPort = (rpcServer.address() as AddressInfo).port;
+    const rpcPort = (rpcServer.address() as AddressInfo).port;
 
     // Override env BEFORE importing createServer so the first getEnv() call
     // picks up a URL that embeds the secret token in its query string.
@@ -58,10 +36,9 @@ describe('global error handler sanitises ethers fetch errors', () => {
     process.env.RPC_CHAIN_ID = '1';
 
     const { createServer: createApp } = await import('../src/server.ts');
-    const capture = makeCaptureLogger();
-    captured = capture.captured;
+    const logger = await createLogger();
 
-    const app = createApp(capture.logger);
+    const app = createApp(logger);
     appServer = app.listen(0);
     const addr = appServer.address();
     if (!addr || typeof addr === 'string') throw new Error('No address');
@@ -78,21 +55,16 @@ describe('global error handler sanitises ethers fetch errors', () => {
     expect(JSON.stringify(res.body)).not.contain(SECRET);
   });
 
-  it('response message is the ethers shortMessage, not the leaky full message', async () => {
+  it('response message preserves the ethers error text but with URLs stripped', async () => {
     const res = await request(baseUrl).get('/api/block-number').expect(500);
     expect(res.body).property('error', true);
-    expect(res.body).property('message', 'server response 401 Unauthorized');
-  });
-
-  it('captured logs do not contain the token', () => {
-    expect(JSON.stringify(captured)).not.contain(SECRET);
-  });
-
-  it('captured log err.info.requestUrl is reduced to origin, not full URL', () => {
-    const errLogs = captured.filter((c) => c.level === 'debug' && c.msg === 'unhandled error');
-    expect(errLogs).property('length').greaterThan(0);
-    const firstErr = errLogs[0]?.obj as { err?: { info?: { requestUrl?: string } } };
-    const loggedUrl = firstErr?.err?.info?.requestUrl;
-    expect(loggedUrl).equal(`http://localhost:${rpcPort}`);
+    // @polygonlabs/express's createErrorHandler uses the sanitised clone of
+    // the original error for the response body — full ethers text minus any
+    // URLs. The shape of the text is ethers-version-specific; what we
+    // guarantee here is the shortMessage prefix and absence of the token.
+    expect(res.body).property('message').a('string');
+    expect(res.body.message).contain('401 Unauthorized');
+    expect(res.body.message).not.contain(SECRET);
+    expect(res.body.message).not.match(/https?:\/\/[^/\s]+\/[^\s)]/);
   });
 });

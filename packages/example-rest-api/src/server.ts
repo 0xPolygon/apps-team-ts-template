@@ -1,6 +1,5 @@
 import type { Cron } from 'croner';
 
-import { randomUUID } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 
 import cors from 'cors';
@@ -8,20 +7,13 @@ import { JsonRpcProvider, Network } from 'ethers';
 import express, { json } from 'express';
 import helmet from 'helmet';
 
-import { NotFound } from '@polygonlabs/verror';
+import { createErrorHandler, notFoundHandler, setupLogger } from '@polygonlabs/express';
 
 import type { Logger } from './logger.ts';
 
 import { getEnv } from './env.ts';
-import { createErrorHandler } from './errors.ts';
 import { buildRouter } from './routes/index.ts';
 import { NetworkService } from './services/NetworkService.ts';
-
-declare module 'express-serve-static-core' {
-  interface Request {
-    log: Logger;
-  }
-}
 
 export type ServerEventMap = {
   /** Emitted when the cron is registered, after listen() is called. */
@@ -64,11 +56,13 @@ export function createServer(logger: Logger) {
   app.use(cors());
   app.use(helmet());
   app.use(json());
-
-  app.use((req, _res, next) => {
-    req.log = logger.child({ requestId: randomUUID() });
-    next();
-  });
+  // setupLogger does two things in one call: captures `logger` as the
+  // out-of-request fallback for getLogger(), and returns middleware that
+  // wraps every request in an AsyncLocalStorage scope holding a child
+  // logger tagged with a fresh requestId. Route and service code calls
+  // getLogger() to access it without threading req or a logger parameter
+  // through every signature.
+  app.use(setupLogger(logger));
 
   app.get('/health-check', (_req, res) => {
     res.json({ success: true });
@@ -88,14 +82,10 @@ export function createServer(logger: Logger) {
 
     app.use('/api', buildRouter({ blockNumberService }));
 
-    app.use((req, res) => {
-      const err = new NotFound(`${req.method} ${req.path}`);
-      res.status(404).json({ error: true, message: err.message });
-    });
-
-    // Global error handler — sanitises ethers fetch errors (which embed RPC
-    // URLs including auth tokens) before either logging or responding. See
-    // src/errors.ts for the detection and sanitisation logic.
+    // Mount last: notFoundHandler converts unmatched paths into NotFound,
+    // createErrorHandler maps HTTPError subclasses onto status codes and
+    // sanitises ethers fetch errors before either logging or responding.
+    app.use(notFoundHandler);
     app.use(createErrorHandler());
 
     const server = _listen(...args);
