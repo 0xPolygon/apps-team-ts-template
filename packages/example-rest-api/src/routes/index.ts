@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import { getLogger } from '@polygonlabs/express';
+
 import type { NetworkService } from '../services/NetworkService.ts';
 
 import { openApiRouter } from './openapi.ts';
@@ -13,8 +15,8 @@ export function buildRouter({
 
   router.use('/', openApiRouter);
 
-  router.get('/hello', (req, res) => {
-    req.log.debug('hello endpoint called');
+  router.get('/hello', (_req, res) => {
+    getLogger().debug('hello endpoint called');
     res.json({ message: 'Hello, world!' });
   });
 
@@ -26,9 +28,9 @@ export function buildRouter({
   // getBlockNumber() returns a number that fits comfortably in int64, so
   // we stringify on serialise; the generated client decodes back to bigint
   // before the value reaches the caller.
-  router.get('/block-number', async (req, res) => {
+  router.get('/block-number', async (_req, res) => {
     const blockNumber = await blockNumberService.get();
-    req.log.debug({ blockNumber }, 'block number fetched');
+    getLogger().debug({ blockNumber }, 'block number fetched');
     res.json({ blockNumber: String(blockNumber) });
   });
 
