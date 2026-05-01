@@ -11,6 +11,15 @@
 // generate` from the registered Zod schemas in `@polygonlabs/example-schemas`,
 // so there is no rename layer to drift.
 //
+// Every SDK function comes from `./generated/registry-validator.gen.ts` —
+// the `@polygonlabs/zod-to-openapi-heyapi` plugin owns the canonical SDK
+// surface. Codec-bearing ops (registered input schemas) get a wrapper
+// that runs `z.encode(schema, value)` before delegating; everything else
+// is a thin re-binding of the upstream `@hey-api/sdk` emission. The
+// `includeInEntry: false` config on `@hey-api/sdk` keeps the raw
+// functions out of the auto-barrel so there's exactly one canonical
+// import name per operation.
+//
 // React-flavoured TanStack Query options factories (`getBlockNumberOptions`
 // etc.) live in the `./react` subpath export so consumers that don't need
 // React don't pay the @tanstack/react-query peer-dep cost.
@@ -24,4 +33,12 @@
 //   const myClient = createClient(createConfig({ baseUrl, fetch: customFetch }));
 //   await getBlockNumber({ client: myClient });
 export { client } from './generated/client.gen.ts';
-export { getBlockNumber, getHealthCheck, getHello } from './generated/sdk.gen.ts';
+export {
+  createMessage,
+  getBlockMetadata,
+  getBlockNumber,
+  getHealthCheck,
+  getHello,
+  getMessage,
+  listMessages
+} from './generated/registry-validator.gen.ts';

@@ -81,6 +81,11 @@ function buildEnv() {
       // Example value: '["https://rpc1.example.com","https://rpc2.example.com"]'
       RPC_URLS: z.string().transform(parseRpcUrlArray).optional(),
       RPC_CHAIN_ID: z.coerce.number().int().positive(),
+      // Shared secret for the management endpoints — operations declaring
+      // `security: [{ ApiKeyAuth: [] }]` require `x-api-key: <MANAGEMENT_API_KEY>`.
+      // Required: there is no public mode; production deployments must
+      // provision a value via the secret manager.
+      MANAGEMENT_API_KEY: z.string().min(1),
       PRETTY_LOGS: BooleanOrBooleanStringSchema.optional(),
       SENTRY_DSN: z.url().optional()
     },

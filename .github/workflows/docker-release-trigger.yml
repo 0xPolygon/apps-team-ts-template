@@ -26,6 +26,10 @@ jobs:
       # this trigger's env block with their own (token-bearing) URLs.
       RPC_URL: https://ethereum-rpc.publicnode.com
       RPC_CHAIN_ID: '1'
+      # Auth-gated operations require this header. The CI value is a throwaway
+      # placeholder; production deployments inject a real secret via External
+      # Secrets Operator.
+      MANAGEMENT_API_KEY: ci-test-secret
     outputs:
       image_name: ${{ steps.docker-test.outputs.image_name }}
       image_tag: ${{ steps.docker-test.outputs.image_tag }}
@@ -37,7 +41,7 @@ jobs:
         uses: 0xPolygon/pipelines/.github/actions/docker-test@main
         with:
           tag: ${{ inputs.tag || '' }}
-          test_vars: RPC_URL RPC_CHAIN_ID
+          test_vars: RPC_URL RPC_CHAIN_ID MANAGEMENT_API_KEY
 
   release:
     needs: test
