@@ -1,6 +1,6 @@
 {
   "name": "@polygonlabs/example-schemas",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Zod response schemas, OpenAPI registry, and committed spec for the Example REST API",
   "type": "module",
   "private": true,

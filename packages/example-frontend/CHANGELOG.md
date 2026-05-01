@@ -1,5 +1,16 @@
 # example-frontend
 
+## 1.0.4
+
+### Patch Changes
+
+- 155f133: Switch the integration tests and the block-number hook to the hey-api SDK shape: SDK functions return `{ data, error, ... }`; the singleton client is configured once via `client.setConfig({ baseUrl })` at app entry. The block-number wire field is now an `Int64Codec` digit string that the generated transformer decodes to `bigint` — callers receive `data.blockNumber: bigint`.
+- Updated dependencies [38291ed]
+- Updated dependencies [83b87da]
+- Updated dependencies [155f133]
+- Updated dependencies [1acf577]
+  - @polygonlabs/example-client@0.3.0
+
 ## 1.0.3
 
 ### Patch Changes
