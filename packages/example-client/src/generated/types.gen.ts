@@ -16,7 +16,60 @@ export type HelloResponse = {
  * Latest block number from the configured RPC endpoint
  */
 export type BlockNumberResponse = {
+    /**
+     * Block height — fits in int64.
+     */
     blockNumber: string;
+};
+
+/**
+ * Block header metadata for a specific height
+ */
+export type BlockMetadata = {
+    number: string;
+    hash: string;
+    parentHash: string;
+    timestamp: string;
+};
+
+/**
+ * Standard error response shape from `@polygonlabs/express`'s `createErrorHandler`. `info` is present when the underlying `HTTPError` carries structured info (e.g. validation failures, domain-specific context); absent for plain errors and most non-validation HTTPErrors.
+ */
+export type ErrorResponse = {
+    error: true;
+    message: string;
+    info?: {
+        [key: string]: unknown;
+    };
+};
+
+export type NotFound = {
+    error: true;
+    message: string;
+};
+
+export type Message = {
+    id: string;
+    text: string;
+    createdAt: string;
+};
+
+export type ValidationError = {
+    error: true;
+    message: string;
+    issues?: Array<{
+        path: Array<string | number>;
+        message: string;
+    }>;
+};
+
+export type CreateMessageRequest = {
+    text: string;
+};
+
+export type MessageList = {
+    items: Array<Message>;
+    nextCursor: string | null;
 };
 
 export type GetHealthCheckData = {
@@ -66,3 +119,105 @@ export type GetBlockNumberResponses = {
 };
 
 export type GetBlockNumberResponse = GetBlockNumberResponses[keyof GetBlockNumberResponses];
+
+export type GetBlockMetadataData = {
+    body?: never;
+    path: {
+        blockNumber: string;
+    };
+    query?: never;
+    url: '/api/blocks/{blockNumber}';
+};
+
+export type GetBlockMetadataErrors = {
+    /**
+     * Missing or invalid x-api-key header
+     */
+    401: ErrorResponse;
+    /**
+     * Block not found
+     */
+    404: NotFound;
+};
+
+export type GetBlockMetadataError = GetBlockMetadataErrors[keyof GetBlockMetadataErrors];
+
+export type GetBlockMetadataResponses = {
+    /**
+     * Block metadata
+     */
+    200: BlockMetadata;
+};
+
+export type GetBlockMetadataResponse = GetBlockMetadataResponses[keyof GetBlockMetadataResponses];
+
+export type ListMessagesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        cursor?: string;
+        since?: string;
+    };
+    url: '/api/messages';
+};
+
+export type ListMessagesResponses = {
+    /**
+     * Page of messages
+     */
+    200: MessageList;
+};
+
+export type ListMessagesResponse = ListMessagesResponses[keyof ListMessagesResponses];
+
+export type CreateMessageData = {
+    body?: CreateMessageRequest;
+    path?: never;
+    query?: never;
+    url: '/api/messages';
+};
+
+export type CreateMessageErrors = {
+    /**
+     * Invalid request
+     */
+    400: ValidationError;
+};
+
+export type CreateMessageError = CreateMessageErrors[keyof CreateMessageErrors];
+
+export type CreateMessageResponses = {
+    /**
+     * Message created
+     */
+    200: Message;
+};
+
+export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
+
+export type GetMessageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/messages/{id}';
+};
+
+export type GetMessageErrors = {
+    /**
+     * Not found
+     */
+    404: NotFound;
+};
+
+export type GetMessageError = GetMessageErrors[keyof GetMessageErrors];
+
+export type GetMessageResponses = {
+    /**
+     * Message
+     */
+    200: Message;
+};
+
+export type GetMessageResponse = GetMessageResponses[keyof GetMessageResponses];

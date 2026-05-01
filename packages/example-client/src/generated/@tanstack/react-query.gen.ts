@@ -3,9 +3,9 @@
 import { type DefaultError, queryOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import type { GetBlockNumberResponse, GetHealthCheckResponse, GetHelloResponse } from '../registry-validator.gen.js';
-import { getBlockNumber, getHealthCheck, getHello, type Options } from '../sdk.gen.js';
-import type { GetBlockNumberData, GetHealthCheckData, GetHelloData } from '../types.gen.js';
+import { type GetBlockMetadataError, type GetBlockMetadataResponse, getBlockNumber, type GetBlockNumberResponse, getHealthCheck, type GetHealthCheckResponse, getHello, type GetHelloResponse, getMessage, type GetMessageError, type GetMessageResponse, type ListMessagesResponse } from '../registry-validator.gen.js';
+import { getBlockMetadata, listMessages, type Options } from '../sdk.gen.js';
+import type { GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, ListMessagesData } from '../types.gen.js';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -94,4 +94,60 @@ export const getBlockNumberOptions = (options?: Options<GetBlockNumberData>) => 
         return data;
     },
     queryKey: getBlockNumberQueryKey(options)
+});
+
+export const getBlockMetadataQueryKey = (options: Options<GetBlockMetadataData>) => createQueryKey('getBlockMetadata', options);
+
+/**
+ * Block metadata by height
+ *
+ * Looks up a block by its height via RPC and returns header metadata.
+ */
+export const getBlockMetadataOptions = (options: Options<GetBlockMetadataData>) => queryOptions<GetBlockMetadataResponse, GetBlockMetadataError, GetBlockMetadataResponse, ReturnType<typeof getBlockMetadataQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getBlockMetadata({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getBlockMetadataQueryKey(options)
+});
+
+export const listMessagesQueryKey = (options?: Options<ListMessagesData>) => createQueryKey('listMessages', options);
+
+/**
+ * List messages
+ */
+export const listMessagesOptions = (options?: Options<ListMessagesData>) => queryOptions<ListMessagesResponse, DefaultError, ListMessagesResponse, ReturnType<typeof listMessagesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listMessages({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listMessagesQueryKey(options)
+});
+
+export const getMessageQueryKey = (options: Options<GetMessageData>) => createQueryKey('getMessage', options);
+
+/**
+ * Get a message by id
+ */
+export const getMessageOptions = (options: Options<GetMessageData>) => queryOptions<GetMessageResponse, GetMessageError, GetMessageResponse, ReturnType<typeof getMessageQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getMessage({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getMessageQueryKey(options)
 });

@@ -28,7 +28,12 @@ export default defineConfig({
     })) as never,
     '@hey-api/typescript',
     '@hey-api/client-fetch',
-    { name: '@hey-api/sdk', transformer: true },
+    // includeInEntry: false is required — registryPlugin's wrappers are
+    // the public SDK surface and the raw SDK plugin's same-name
+    // emissions must stay out of the auto-generated entry barrel. The
+    // plugin's pre-flight check throws with the exact config to write
+    // if you forget.
+    { name: '@hey-api/sdk', transformer: true, includeInEntry: false },
     {
       name: '@tanstack/react-query',
       queryKeys: true,
