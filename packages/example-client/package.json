@@ -24,7 +24,8 @@
   },
   "scripts": {
     "generate": "openapi-ts -f openapi-ts.config.ts",
-    "build": "pnpm run generate && tsc -p tsconfig.build.json",
+    "build": "pnpm run generate && pnpm run typecheck && tsc -p tsconfig.build.json",
+    "build:clean": "pnpm run generate && pnpm run typecheck && rm -rf dist *.tsbuildinfo && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "codegen-drift-check": "pnpm run generate && git diff --exit-code -- src/generated",
     "clean": "rm -rf dist node_modules src/generated *.tsbuildinfo"

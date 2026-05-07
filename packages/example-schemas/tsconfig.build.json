@@ -8,7 +8,12 @@
     "rootDir": "src",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    // Override the source-condition resolution inherited from tsconfig.json.
+    // Build-time output must reference workspace deps via their published
+    // dist/.d.ts (Node default resolution), not their src/. Currently zero
+    // diff in emitted output; defends against future drift.
+    "customConditions": []
   },
   "include": ["src/**/*.ts"]
 }

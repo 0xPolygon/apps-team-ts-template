@@ -19,7 +19,8 @@
     "./openapi.json": "./openapi.json"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
+    "build": "pnpm run typecheck && tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
+    "build:clean": "pnpm run typecheck && rm -rf dist *.tsbuildinfo && tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist node_modules *.tsbuildinfo"
   },
