@@ -35,9 +35,11 @@ export {
 // name.
 export { ErrorResponseSchema as ErrorResponse } from '@polygonlabs/openapi-registry/error-schemas';
 
-// Registry composition — `buildRegistry` returns a TypedRegistry whose
-// inferred return type carries every registered operation. `Operations` is
-// the accumulator extracted from that return type; consumers of the
-// registry-driven router use it for typed handler binding.
+// Registry composition — `buildRegistry` is a chained `TypedRegistry`
+// builder; every chain step's narrow flows through the inferred return
+// into anything that consumes `typeof buildRegistry`. Service handlers
+// derive their typed manifest from it directly via
+// `HandlerMapFor<typeof buildRegistry, AppAuthMap>` (see
+// `@polygonlabs/express/registry`); no separate `Operations` alias is
+// needed or re-exported here.
 export { buildRegistry } from './registry.ts';
-export type { Operations } from './registry.ts';

@@ -127,20 +127,32 @@ manifest, `@polygonlabs/express` consumes it for the router, and
 schemas are used at every layer.
 
 - **Schemas package** (`packages/example-schemas/`): a `TypedRegistry` from
-  `@polygonlabs/openapi-registry` accumulates every `registerPath` call into
-  the registry's *type* (not just `definitions`). `buildRegistry()` is wrapped
-  in a function so the inferred return type carries the accumulated narrow
-  across the export boundary; `Operations` is extracted from that return type
-  and consumed downstream.
+  `@polygonlabs/openapi-registry` accumulates every `registerPath` and
+  `registerSecurityScheme` call into the registry's *type* (not just
+  `definitions`) via chained method returns. `buildRegistry` is a single
+  chained expression (`new TypedRegistry().registerSecurityScheme(...).with(addCoreRoutes)...`);
+  no `: TypedRegistry` annotation, no function-wrapper-as-narrow-bridge —
+  the chain's inferred return type carries the manifest directly. The one
+  silent failure mode (a discarded chain return drops the type-level
+  narrow even though the runtime registration still happens) is caught
+  by two layers: `OperationsOf<typeof buildRegistry>`'s empty-manifest
+  brand surfaces the worst case as a type error, and the
+  `polygon/no-discarded-typed-registry-chain` lint rule from
+  `@polygonlabs/apps-team-lint`'s `typescript()` preset catches partial
+  discards at lint time.
 - **Service package** (`packages/example-rest-api/src/server.ts`):
   `createRegistryRouter({ registry })` from `@polygonlabs/express/registry`
   derives every mounted route from the same registry that produces the served
   spec — the spec and the routes can't drift. `.auth(...)` binds auth handlers
   by security-scheme name (compile-time exhaustive); `.implement(...)` binds
   operation handlers by `operationId` (compile-time exhaustive). Per-domain
-  handler bags use `defineHandlers<Operations, AppAuthMap>()({ ... })`;
-  `defineHandlers` is a no-op at runtime, its job is constraining each
-  handler's `req` / `res` to the operation's typed view.
+  handler bags type themselves via
+  `({ ... }) satisfies Partial<HandlerMapFor<typeof buildRegistry, AppAuthMap>>`;
+  `HandlerMapFor` reads the registry-builder type directly (no separate
+  `Operations` import needed) and `Partial<…>` lets each domain bag cover
+  a subset of operations — the wiring file's `.implement(...)` chain
+  composes them and `.toExpress()`'s exhaustiveness gate catches anything
+  unbound.
 - **Logger and error handling**: `setupLogger(logger)` from
   `@polygonlabs/express` mounts the per-request child logger and primes
   `getLogger()` (which handler code uses instead of threading `req.log`).

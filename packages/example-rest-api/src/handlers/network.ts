@@ -11,20 +11,20 @@
  * without ever decoding the path codec.
  */
 
-import type { Operations } from '@polygonlabs/example-schemas';
+import type { buildRegistry } from '@polygonlabs/example-schemas';
+import type { HandlerMapFor } from '@polygonlabs/express/registry';
 
 import { getLogger } from '@polygonlabs/express';
-import { defineHandlers } from '@polygonlabs/express/registry';
 
 import type { BlockData } from '../server.ts';
 import type { NetworkService } from '../services/NetworkService.ts';
 import type { AppAuthMap } from './auth.ts';
 
-export function buildNetworkHandlers(deps: {
+export const buildNetworkHandlers = (deps: {
   blockNumberService: NetworkService<number>;
   getBlock: (blockNumber: bigint) => Promise<BlockData | null>;
-}) {
-  return defineHandlers<Operations, AppAuthMap>()({
+}) =>
+  ({
     getBlockNumber: async (_req, res) => {
       const blockNumber = await deps.blockNumberService.get();
       getLogger().debug({ blockNumber }, 'block number fetched');
@@ -48,5 +48,4 @@ export function buildNetworkHandlers(deps: {
       }
       res.json(block);
     }
-  });
-}
+  }) satisfies Partial<HandlerMapFor<typeof buildRegistry, AppAuthMap>>;

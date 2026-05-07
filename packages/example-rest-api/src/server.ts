@@ -66,11 +66,16 @@ export type ServerDependencies = {
  * and mounts routes — everything except starting the HTTP server and
  * background services.
  *
- * Routes are derived from the typed `Operations` manifest exported by
- * `@polygonlabs/example-schemas`. The registry router validates each request
- * against the registered Zod schemas (codec-decoded `req.params/query/body`
- * reach handlers as runtime types) and re-encodes responses on the way out
- * — the same Zod values that produced the spec and the codegen'd client.
+ * Routes are derived from the `TypedRegistry` returned by `buildRegistry()`
+ * in `@polygonlabs/example-schemas`. Per-domain handler bags use
+ * `satisfies Partial<HandlerMapFor<typeof buildRegistry, AppAuthMap>>` to
+ * type each handler against its operation; the chain at the wiring site
+ * (`createRegistryRouter({ registry }).auth(...).implement(...).toExpress()`)
+ * enforces exhaustive coverage at compile time. The registry router
+ * validates each request against the registered Zod schemas (codec-decoded
+ * `req.params/query/body` reach handlers as runtime types) and re-encodes
+ * responses on the way out — the same Zod values that produced the spec
+ * and the codegen'd client.
  *
  * Call .listen() on the returned app to start serving. The listen() override
  * creates a NetworkService that polls the block number every 5 seconds,
@@ -134,17 +139,19 @@ export function createServer(logger: Logger, deps: ServerDependencies = {}) {
     serverEvents.emit('cronRegistered', { name: 'blockNumber', cron: blockNumberService['job'] });
 
     // The single source of truth — TypedRegistry's accumulated narrow flows
-    // through buildRegistry's inferred return type into `Operations`.
+    // through buildRegistry's inferred return type. Downstream handler bags
+    // derive their typed shape from `typeof buildRegistry` directly via
+    // `HandlerMapFor`; the registry value is what the runtime router reads
+    // its operation list from.
     const registry = buildRegistry();
 
     // Compose handler bags via per-domain factories. Each factory returns a
-    // partial `HandlerMap<Operations, AppAuthMap>` typed bag from
-    // `defineHandlers(...)`; the router's `.implement(...)` chain enforces
-    // exhaustive coverage at compile time — a missing handler is a TS error
-    // at this call site, not a runtime surprise. Auth runs declaratively via
-    // `.auth(...)`: any operation declaring `security: [{ ApiKeyAuth: [] }]`
-    // requires the `ApiKeyAuth` handler to authenticate before request
-    // validation runs.
+    // partial bag typed via `satisfies Partial<HandlerMapFor<typeof buildRegistry,
+    // AppAuthMap>>`; the router's `.implement(...)` chain enforces exhaustive
+    // coverage at compile time — a missing handler is a TS error at this call
+    // site, not a runtime surprise. Auth runs declaratively via `.auth(...)`:
+    // any operation declaring `security: [{ ApiKeyAuth: [] }]` requires the
+    // `ApiKeyAuth` handler to authenticate before request validation runs.
     const registryRouter = createRegistryRouter({ registry })
       .auth(buildAuthHandlers(env))
       .implement(buildStaticHandlers())

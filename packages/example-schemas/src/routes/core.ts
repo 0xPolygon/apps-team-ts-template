@@ -4,42 +4,44 @@
  * domain and a useful template for adding others.
  */
 
-import type { OperationsManifest, TypedRegistry } from '@polygonlabs/openapi-registry';
+import type { RouteWithOpId, TypedRegistry } from '@polygonlabs/openapi-registry';
 
 import { HealthCheckResponse, HelloResponse } from '../schemas.ts';
 
 /**
- * Polymorphic over `Prev` so the helper preserves whatever ops the caller
- * has already registered. Each `r.registerPath(...)` narrows `r` via
- * `asserts this is X`; the inferred return captures the cumulative narrow
- * for `registry.extend(...)` to assert at the call site.
+ * Generic over the parent's `Ops` and `Schemes` so the helper preserves
+ * everything the caller had already registered. The chained `registerPath`
+ * calls narrow the registry; the return carries the cumulative narrow
+ * back through the outer `.with(addCoreRoutes)` call.
  */
-export function addCoreRoutes<Prev extends OperationsManifest>(r: TypedRegistry<Prev>) {
-  r.registerPath({
-    operationId: 'getHealthCheck',
-    method: 'get',
-    path: '/health-check',
-    summary: 'Liveness check',
-    responses: {
-      200: {
-        description: 'Service is alive',
-        content: { 'application/json': { schema: HealthCheckResponse } }
+export const addCoreRoutes = <
+  Ops extends Record<string, RouteWithOpId>,
+  Schemes extends Record<string, true>
+>(
+  r: TypedRegistry<Ops, Schemes>
+) =>
+  r
+    .registerPath({
+      operationId: 'getHealthCheck',
+      method: 'get',
+      path: '/health-check',
+      summary: 'Liveness check',
+      responses: {
+        200: {
+          description: 'Service is alive',
+          content: { 'application/json': { schema: HealthCheckResponse } }
+        }
       }
-    }
-  });
-
-  r.registerPath({
-    operationId: 'getHello',
-    method: 'get',
-    path: '/api/hello',
-    summary: 'Hello world',
-    responses: {
-      200: {
-        description: 'Greeting response',
-        content: { 'application/json': { schema: HelloResponse } }
+    })
+    .registerPath({
+      operationId: 'getHello',
+      method: 'get',
+      path: '/api/hello',
+      summary: 'Hello world',
+      responses: {
+        200: {
+          description: 'Greeting response',
+          content: { 'application/json': { schema: HelloResponse } }
+        }
       }
-    }
-  });
-
-  return r;
-}
+    });

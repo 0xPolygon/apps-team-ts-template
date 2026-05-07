@@ -27,9 +27,9 @@ export function buildAuthHandlers(env: Env) {
 }
 
 /**
- * Auth-handler-map type derived from the factory's inferred return. Handler
- * modules pass this as the second type parameter to
- * `defineHandlers<Operations, AppAuthMap>()` so their `req.auth` matches
- * what the router resolves at runtime.
+ * Auth-handler-map type derived from the factory's inferred return.
+ * Handler modules pass this as the second type parameter to
+ * `HandlerMapFor<typeof buildRegistry, AppAuthMap>` so their `req.auth`
+ * matches what the router resolves at runtime.
  */
 export type AppAuthMap = ReturnType<typeof buildAuthHandlers>;
