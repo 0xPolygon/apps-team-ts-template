@@ -25,7 +25,12 @@ See `pnpm-workspace.yaml` for workspace configuration.
 
 - Dev tooling (ESLint, Prettier, markdownlint, Husky, TypeScript base config) is at the root
 - Runtime dependencies are declared in each package's `package.json`
-- Each package has its own `tsconfig.json` extending the root base config
+- TypeScript uses the Nx three-tier `tsconfig` pattern: `tsconfig.base.json` at the
+  repo root owns all shared `compilerOptions`; each package has a hub `tsconfig.json`
+  (no `compilerOptions`, only `references`) plus per-purpose `tsconfig.lib.json` (source
+  build / typecheck) and `tsconfig.spec.json` (tests + non-source files like
+  `vitest.config.ts`). The root `tsconfig.json` is itself a solution-style hub that
+  references each package hub. See "Adding a New Package" below.
 
 There are three package roles:
 
@@ -70,7 +75,7 @@ via a `source` export condition alongside the compiled `dist/` targets:
 This enables fully build-free local development:
 
 - **Typecheck** (`pnpm run typecheck`) — resolves `.ts` source via `customConditions: ["@polygonlabs/source"]`
-  in `tsconfig.json`. No `dist/` needed.
+  in `tsconfig.base.json`. No `dist/` needed.
 - **Service dev** (`pnpm --filter example-rest-api run dev`) — passes `--conditions @polygonlabs/source` to
   Node. Workspace symlinks point outside `node_modules/` so Node's type stripping applies.
   Changes to library source are visible to the running service immediately — no watchers or
@@ -247,12 +252,44 @@ for the plugin's full design, option semantics, and migration notes.
 
 ## Adding a New Package
 
-1. Create `packages/<name>/` with `package.json`, `tsconfig.json`, and (for publishable
-   packages that emit output) `tsconfig.build.json`
-2. Add a reference in root `tsconfig.json`:
-   - **Publishable library** (`composite: true` in `tsconfig.build.json`):
-     `{ "path": "packages/<name>/tsconfig.build.json" }`
-   - **Service or frontend** (no `composite`):
-     `{ "path": "packages/<name>" }`
-3. Add runtime dependencies to the package's `package.json`
-4. Run `pnpm install` from the repo root
+Each package follows the three-tier `tsconfig` pattern:
+
+1. Create `packages/<name>/` with `package.json` and three TypeScript configs:
+   - `tsconfig.json` — hub. `extends: "../../tsconfig.base.json"`, `files: []`,
+     `include: []`, and `references` pointing at the package's own
+     `tsconfig.lib.json` and `tsconfig.spec.json`.
+   - `tsconfig.lib.json` — source build / typecheck. Sets `rootDir: src`,
+     `outDir: dist`, `emitDeclarationOnly: false`, owns `include: ["src/**/*.ts"]`.
+     For published library packages, override `customConditions: []` so build-time
+     resolution of workspace deps goes through their published `dist/` rather than
+     the `@polygonlabs/source` condition. Declare cross-package dependencies with
+     `references` pointing at the depended-upon package's `tsconfig.lib.json`
+     (not its hub). The Vite-style frontend resolves workspace deps via the
+     `@polygonlabs/source` condition without a project reference, so its lib has
+     no cross-package `references`.
+   - `tsconfig.spec.json` — tests and non-source files (`vitest.config.ts`,
+     `vitest.setup.ts`, top-level config files, etc.). Adds vitest types,
+     references `./tsconfig.lib.json`. Spec files commonly use `.ts`-extension
+     imports relative to other projects, so set `allowImportingTsExtensions: true`
+     and `rewriteRelativeImportExtensions: false` to silence the cross-project
+     rewrite check.
+
+2. Add a reference in the root `tsconfig.json` hub:
+   `{ "path": "packages/<name>" }` — root references the package hub, never the
+   package's lib or spec directly.
+
+3. Add `package.json` scripts that use `tsc -b`:
+   - `"typecheck": "tsc -b"` — walks the hub graph, emits to gitignored
+     `dist/` and `out-tsc/` directories (no `--noEmit` because
+     `tsc --build --noEmit` is incompatible with composite project references).
+   - For library packages: `"build": "pnpm run typecheck && tsc -b tsconfig.lib.json && ..."` —
+     target the lib config explicitly so the build emits the library payload only,
+     not the spec output.
+
+4. Add an `eslint.config.js` per the team template, plus a top-level
+   `{ ignores: ['out-tsc/**'] }` block — `tsc -b` emits `.d.ts` artifacts to
+   `out-tsc/` for spec configs, and ESLint's TS project service errors on
+   `.d.ts` files outside any tsconfig include.
+
+5. Add runtime dependencies to the package's `package.json` and run
+   `pnpm install` from the repo root.

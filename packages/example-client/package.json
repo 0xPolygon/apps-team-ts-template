@@ -24,11 +24,11 @@
   },
   "scripts": {
     "generate": "openapi-ts -f openapi-ts.config.ts",
-    "build": "pnpm run generate && pnpm run typecheck && tsc -p tsconfig.build.json",
-    "build:clean": "pnpm run generate && pnpm run typecheck && rm -rf dist *.tsbuildinfo && tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
+    "build": "pnpm run generate && pnpm run typecheck && tsc -b tsconfig.lib.json",
+    "build:clean": "pnpm run generate && pnpm run typecheck && rm -rf dist out-tsc *.tsbuildinfo && tsc -b tsconfig.lib.json",
+    "typecheck": "tsc -b",
     "codegen-drift-check": "pnpm run generate && git diff --exit-code -- src/generated",
-    "clean": "rm -rf dist node_modules src/generated *.tsbuildinfo"
+    "clean": "rm -rf dist out-tsc node_modules src/generated *.tsbuildinfo"
   },
   "dependencies": {
     "@polygonlabs/example-schemas": "workspace:*"

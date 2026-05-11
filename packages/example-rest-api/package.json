@@ -8,8 +8,8 @@
     "start": "node src/index.ts",
     "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules *.tsbuildinfo"
+    "typecheck": "tsc -b",
+    "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.1",
