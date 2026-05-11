@@ -3,130 +3,191 @@
 import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import type { CreateMessageError, CreateMessageResponse, GetBlockNumberResponse, GetHealthCheckResponse, GetHelloResponse, GetMessageError, GetMessageResponse } from '../registry-validator.gen.js';
-import { createMessage, getBlockNumber, getHealthCheck, getHello, getMessage, type Options } from '../sdk.gen.js';
-import type { CreateMessageData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData } from '../types.gen.js';
+import type {
+  CreateMessageError,
+  CreateMessageResponse,
+  GetBlockNumberResponse,
+  GetHealthCheckResponse,
+  GetHelloResponse,
+  GetMessageError,
+  GetMessageResponse
+} from '../registry-validator.gen.js';
+import {
+  createMessage,
+  getBlockNumber,
+  getHealthCheck,
+  getHello,
+  getMessage,
+  type Options
+} from '../sdk.gen.js';
+import type {
+  CreateMessageData,
+  GetBlockNumberData,
+  GetHealthCheckData,
+  GetHelloData,
+  GetMessageData
+} from '../types.gen.js';
 
 export type QueryKey<TOptions extends Options> = [
-    Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
-        _id: string;
-        _infinite?: boolean;
-        tags?: ReadonlyArray<string>;
-    }
+  Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
+    _id: string;
+    _infinite?: boolean;
+    tags?: ReadonlyArray<string>;
+  }
 ];
 
-const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions, infinite?: boolean, tags?: ReadonlyArray<string>): [
-    QueryKey<TOptions>[0]
-] => {
-    const params: QueryKey<TOptions>[0] = { _id: id, baseUrl: options?.baseUrl || (options?.client ?? client).getConfig().baseUrl } as QueryKey<TOptions>[0];
-    if (infinite) {
-        params._infinite = infinite;
-    }
-    if (tags) {
-        params.tags = tags;
-    }
-    if (options?.body) {
-        params.body = options.body;
-    }
-    if (options?.headers) {
-        params.headers = options.headers;
-    }
-    if (options?.path) {
-        params.path = options.path;
-    }
-    if (options?.query) {
-        params.query = options.query;
-    }
-    return [params];
+const createQueryKey = <TOptions extends Options>(
+  id: string,
+  options?: TOptions,
+  infinite?: boolean,
+  tags?: ReadonlyArray<string>
+): [QueryKey<TOptions>[0]] => {
+  const params: QueryKey<TOptions>[0] = {
+    _id: id,
+    baseUrl: options?.baseUrl || (options?.client ?? client).getConfig().baseUrl
+  } as QueryKey<TOptions>[0];
+  if (infinite) {
+    params._infinite = infinite;
+  }
+  if (tags) {
+    params.tags = tags;
+  }
+  if (options?.body) {
+    params.body = options.body;
+  }
+  if (options?.headers) {
+    params.headers = options.headers;
+  }
+  if (options?.path) {
+    params.path = options.path;
+  }
+  if (options?.query) {
+    params.query = options.query;
+  }
+  return [params];
 };
 
-export const getHealthCheckQueryKey = (options?: Options<GetHealthCheckData>) => createQueryKey('getHealthCheck', options);
+export const getHealthCheckQueryKey = (options?: Options<GetHealthCheckData>) =>
+  createQueryKey('getHealthCheck', options);
 
 /**
  * Liveness check
  */
-export const getHealthCheckOptions = (options?: Options<GetHealthCheckData>) => queryOptions<GetHealthCheckResponse, DefaultError, GetHealthCheckResponse, ReturnType<typeof getHealthCheckQueryKey>>({
+export const getHealthCheckOptions = (options?: Options<GetHealthCheckData>) =>
+  queryOptions<
+    GetHealthCheckResponse,
+    DefaultError,
+    GetHealthCheckResponse,
+    ReturnType<typeof getHealthCheckQueryKey>
+  >({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getHealthCheck({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
+      const { data } = await getHealthCheck({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true
+      });
+      return data;
     },
     queryKey: getHealthCheckQueryKey(options)
-});
+  });
 
-export const getHelloQueryKey = (options?: Options<GetHelloData>) => createQueryKey('getHello', options);
+export const getHelloQueryKey = (options?: Options<GetHelloData>) =>
+  createQueryKey('getHello', options);
 
 /**
  * Hello world
  */
-export const getHelloOptions = (options?: Options<GetHelloData>) => queryOptions<GetHelloResponse, DefaultError, GetHelloResponse, ReturnType<typeof getHelloQueryKey>>({
+export const getHelloOptions = (options?: Options<GetHelloData>) =>
+  queryOptions<
+    GetHelloResponse,
+    DefaultError,
+    GetHelloResponse,
+    ReturnType<typeof getHelloQueryKey>
+  >({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getHello({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
+      const { data } = await getHello({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true
+      });
+      return data;
     },
     queryKey: getHelloQueryKey(options)
-});
+  });
 
-export const getBlockNumberQueryKey = (options?: Options<GetBlockNumberData>) => createQueryKey('getBlockNumber', options);
+export const getBlockNumberQueryKey = (options?: Options<GetBlockNumberData>) =>
+  createQueryKey('getBlockNumber', options);
 
 /**
  * Current block number
  *
  * Returns the latest block number from the configured RPC endpoint.
  */
-export const getBlockNumberOptions = (options?: Options<GetBlockNumberData>) => queryOptions<GetBlockNumberResponse, DefaultError, GetBlockNumberResponse, ReturnType<typeof getBlockNumberQueryKey>>({
+export const getBlockNumberOptions = (options?: Options<GetBlockNumberData>) =>
+  queryOptions<
+    GetBlockNumberResponse,
+    DefaultError,
+    GetBlockNumberResponse,
+    ReturnType<typeof getBlockNumberQueryKey>
+  >({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getBlockNumber({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
+      const { data } = await getBlockNumber({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true
+      });
+      return data;
     },
     queryKey: getBlockNumberQueryKey(options)
-});
+  });
 
 /**
  * Create a message
  */
-export const createMessageMutation = (options?: Partial<Options<CreateMessageData>>): UseMutationOptions<CreateMessageResponse, CreateMessageError, Options<CreateMessageData>> => {
-    const mutationOptions: UseMutationOptions<CreateMessageResponse, CreateMessageError, Options<CreateMessageData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await createMessage({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
+export const createMessageMutation = (
+  options?: Partial<Options<CreateMessageData>>
+): UseMutationOptions<CreateMessageResponse, CreateMessageError, Options<CreateMessageData>> => {
+  const mutationOptions: UseMutationOptions<
+    CreateMessageResponse,
+    CreateMessageError,
+    Options<CreateMessageData>
+  > = {
+    mutationFn: async (fnOptions) => {
+      const { data } = await createMessage({
+        ...options,
+        ...fnOptions,
+        throwOnError: true
+      });
+      return data;
+    }
+  };
+  return mutationOptions;
 };
 
-export const getMessageQueryKey = (options: Options<GetMessageData>) => createQueryKey('getMessage', options);
+export const getMessageQueryKey = (options: Options<GetMessageData>) =>
+  createQueryKey('getMessage', options);
 
 /**
  * Get a message by id
  */
-export const getMessageOptions = (options: Options<GetMessageData>) => queryOptions<GetMessageResponse, GetMessageError, GetMessageResponse, ReturnType<typeof getMessageQueryKey>>({
+export const getMessageOptions = (options: Options<GetMessageData>) =>
+  queryOptions<
+    GetMessageResponse,
+    GetMessageError,
+    GetMessageResponse,
+    ReturnType<typeof getMessageQueryKey>
+  >({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getMessage({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
+      const { data } = await getMessage({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true
+      });
+      return data;
     },
     queryKey: getMessageQueryKey(options)
-});
+  });

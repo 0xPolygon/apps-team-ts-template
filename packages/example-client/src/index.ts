@@ -40,5 +40,17 @@ export {
   getHealthCheck,
   getHello,
   getMessage,
-  listMessages
+  // Wrapper-error narrowing surface. The codegen emits `TransportError`
+  // / `UnknownError` classes plus matching `is*Error` type-predicate
+  // guards alongside every wrapper. Re-exported here so consumers
+  // import from `@polygonlabs/example-client` and never reach into
+  // `./generated/*.gen.js` directly. Cross-client / generic helpers
+  // live at `@polygonlabs/zod-to-openapi-heyapi/errors`; per-client
+  // narrowing uses these.
+  isTransportError,
+  isUnknownError,
+  isWrapperError,
+  listMessages,
+  TransportError,
+  UnknownError
 } from './generated/registry-validator.gen.ts';

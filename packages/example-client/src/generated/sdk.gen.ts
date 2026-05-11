@@ -2,91 +2,142 @@
 
 import { client } from './client.gen.js';
 import type { Client, Options as Options2, TDataShape } from './client/index.js';
-import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
-import type { CreateMessageData, GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, ListMessagesData } from './types.gen.js';
+import {
+  type CreateMessageErrors,
+  type CreateMessageResponses,
+  createMessageTransformer,
+  type GetBlockMetadataErrors,
+  type GetBlockMetadataResponses,
+  getBlockMetadataTransformer,
+  type GetBlockNumberResponses,
+  getBlockNumberTransformer,
+  type GetHealthCheckResponses,
+  getHealthCheckTransformer,
+  type GetHelloResponses,
+  getHelloTransformer,
+  type GetMessageErrors,
+  type GetMessageResponses,
+  getMessageTransformer,
+  type ListMessagesResponses,
+  listMessagesTransformer
+} from './registry-validator.gen.js';
+import type {
+  CreateMessageData,
+  GetBlockMetadataData,
+  GetBlockNumberData,
+  GetHealthCheckData,
+  GetHelloData,
+  GetMessageData,
+  ListMessagesData
+} from './types.gen.js';
 
-export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
-    /**
-     * You can provide a client instance returned by `createClient()` instead of
-     * individual options. This might be also useful if you want to implement a
-     * custom client.
-     */
-    client?: Client;
-    /**
-     * You can pass arbitrary values through the `meta` object. This can be
-     * used to access values that aren't defined as part of the SDK function.
-     */
-    meta?: Record<string, unknown>;
+export type Options<
+  TData extends TDataShape = TDataShape,
+  ThrowOnError extends boolean = boolean,
+  TResponse = unknown
+> = Options2<TData, ThrowOnError, TResponse> & {
+  /**
+   * You can provide a client instance returned by `createClient()` instead of
+   * individual options. This might be also useful if you want to implement a
+   * custom client.
+   */
+  client?: Client;
+  /**
+   * You can pass arbitrary values through the `meta` object. This can be
+   * used to access values that aren't defined as part of the SDK function.
+   */
+  meta?: Record<string, unknown>;
 };
 
 /**
  * Liveness check
  */
-export const getHealthCheck = <ThrowOnError extends boolean = false>(options?: Options<GetHealthCheckData, ThrowOnError>) => (options?.client ?? client).get<GetHealthCheckResponses, unknown, ThrowOnError>({
+export const getHealthCheck = <ThrowOnError extends boolean = false>(
+  options?: Options<GetHealthCheckData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<GetHealthCheckResponses, unknown, ThrowOnError>({
     responseTransformer: getHealthCheckTransformer,
     url: '/health-check',
     ...options
-});
+  });
 
 /**
  * Hello world
  */
-export const getHello = <ThrowOnError extends boolean = false>(options?: Options<GetHelloData, ThrowOnError>) => (options?.client ?? client).get<GetHelloResponses, unknown, ThrowOnError>({
+export const getHello = <ThrowOnError extends boolean = false>(
+  options?: Options<GetHelloData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<GetHelloResponses, unknown, ThrowOnError>({
     responseTransformer: getHelloTransformer,
     url: '/api/hello',
     ...options
-});
+  });
 
 /**
  * Current block number
  *
  * Returns the latest block number from the configured RPC endpoint.
  */
-export const getBlockNumber = <ThrowOnError extends boolean = false>(options?: Options<GetBlockNumberData, ThrowOnError>) => (options?.client ?? client).get<GetBlockNumberResponses, unknown, ThrowOnError>({
+export const getBlockNumber = <ThrowOnError extends boolean = false>(
+  options?: Options<GetBlockNumberData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<GetBlockNumberResponses, unknown, ThrowOnError>({
     responseTransformer: getBlockNumberTransformer,
     url: '/api/block-number',
     ...options
-});
+  });
 
 /**
  * Block metadata by height
  *
  * Looks up a block by its height via RPC and returns header metadata.
  */
-export const getBlockMetadata = <ThrowOnError extends boolean = false>(options: Options<GetBlockMetadataData, ThrowOnError>) => (options.client ?? client).get<GetBlockMetadataResponses, GetBlockMetadataErrors, ThrowOnError>({
+export const getBlockMetadata = <ThrowOnError extends boolean = false>(
+  options: Options<GetBlockMetadataData, ThrowOnError>
+) =>
+  (options.client ?? client).get<GetBlockMetadataResponses, GetBlockMetadataErrors, ThrowOnError>({
     responseTransformer: getBlockMetadataTransformer,
     security: [{ name: 'x-api-key', type: 'apiKey' }],
     url: '/api/blocks/{blockNumber}',
     ...options
-});
+  });
 
 /**
  * List messages
  */
-export const listMessages = <ThrowOnError extends boolean = false>(options?: Options<ListMessagesData, ThrowOnError>) => (options?.client ?? client).get<ListMessagesResponses, unknown, ThrowOnError>({
+export const listMessages = <ThrowOnError extends boolean = false>(
+  options?: Options<ListMessagesData, ThrowOnError>
+) =>
+  (options?.client ?? client).get<ListMessagesResponses, unknown, ThrowOnError>({
     responseTransformer: listMessagesTransformer,
     url: '/api/messages',
     ...options
-});
+  });
 
 /**
  * Create a message
  */
-export const createMessage = <ThrowOnError extends boolean = false>(options?: Options<CreateMessageData, ThrowOnError>) => (options?.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
+export const createMessage = <ThrowOnError extends boolean = false>(
+  options?: Options<CreateMessageData, ThrowOnError>
+) =>
+  (options?.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
     responseTransformer: createMessageTransformer,
     url: '/api/messages',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers
+      'Content-Type': 'application/json',
+      ...options?.headers
     }
-});
+  });
 
 /**
  * Get a message by id
  */
-export const getMessage = <ThrowOnError extends boolean = false>(options: Options<GetMessageData, ThrowOnError>) => (options.client ?? client).get<GetMessageResponses, GetMessageErrors, ThrowOnError>({
+export const getMessage = <ThrowOnError extends boolean = false>(
+  options: Options<GetMessageData, ThrowOnError>
+) =>
+  (options.client ?? client).get<GetMessageResponses, GetMessageErrors, ThrowOnError>({
     responseTransformer: getMessageTransformer,
     url: '/api/messages/{id}',
     ...options
-});
+  });
