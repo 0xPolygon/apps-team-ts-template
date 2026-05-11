@@ -1,4 +1,5 @@
 import type { Cron } from 'croner';
+import type { Application } from 'express';
 
 import { EventEmitter } from 'node:events';
 
@@ -81,7 +82,7 @@ export type ServerDependencies = {
  * creates a NetworkService that polls the block number every 5 seconds,
  * emits `cronRegistered`, and wires up cleanup on server close.
  */
-export function createServer(logger: Logger, deps: ServerDependencies = {}) {
+export function createServer(logger: Logger, deps: ServerDependencies = {}): Application {
   const env = getEnv();
 
   // Lazily construct the provider only when a default fetcher actually needs

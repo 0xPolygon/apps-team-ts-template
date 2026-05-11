@@ -8,10 +8,13 @@ import { fileURLToPath } from 'node:url';
 
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
-// Import index.ts first — its side effect (extendZodWithOpenApi) must run
-// before buildRegistry() accesses any schema for the first time.
-import '../src/index.ts';
-import { buildRegistry } from '../src/registry.ts';
+// Import the package's main entry first — its side effect
+// (extendZodWithOpenApi) must run before buildRegistry() accesses any schema
+// for the first time. The package self-import resolves to ./src via the
+// @polygonlabs/source condition at typecheck time and to ./dist at runtime
+// (the build script emits dist/ before this script runs).
+import '@polygonlabs/example-schemas';
+import { buildRegistry } from '@polygonlabs/example-schemas/registry';
 
 const spec = new OpenApiGeneratorV3(buildRegistry().definitions).generateDocument({
   openapi: '3.0.0',
