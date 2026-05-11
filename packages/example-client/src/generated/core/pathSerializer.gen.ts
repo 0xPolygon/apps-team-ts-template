@@ -69,7 +69,7 @@ export const serializeArrayParam = ({
   explode,
   name,
   style,
-  value
+  value,
 }: SerializeOptions<ArraySeparatorStyle> & {
   value: unknown[];
 }) => {
@@ -99,7 +99,7 @@ export const serializeArrayParam = ({
       return serializePrimitiveParam({
         allowReserved,
         name,
-        value: v as string
+        value: v as string,
       });
     })
     .join(separator);
@@ -109,7 +109,7 @@ export const serializeArrayParam = ({
 export const serializePrimitiveParam = ({
   allowReserved,
   name,
-  value
+  value,
 }: SerializePrimitiveParam) => {
   if (value === undefined || value === null) {
     return '';
@@ -117,7 +117,7 @@ export const serializePrimitiveParam = ({
 
   if (typeof value === 'object') {
     throw new Error(
-      'Deeply-nested arrays/objects aren’t supported. Provide your own `querySerializer()` to handle these.'
+      'Deeply-nested arrays/objects aren’t supported. Provide your own `querySerializer()` to handle these.',
     );
   }
 
@@ -130,7 +130,7 @@ export const serializeObjectParam = ({
   name,
   style,
   value,
-  valueOnly
+  valueOnly,
 }: SerializeOptions<ObjectSeparatorStyle> & {
   value: Record<string, unknown> | Date;
   valueOnly?: boolean;
@@ -163,8 +163,8 @@ export const serializeObjectParam = ({
       serializePrimitiveParam({
         allowReserved,
         name: style === 'deepObject' ? `${name}[${key}]` : key,
-        value: v as string
-      })
+        value: v as string,
+      }),
     )
     .join(separator);
   return style === 'label' || style === 'matrix' ? separator + joinedValues : joinedValues;

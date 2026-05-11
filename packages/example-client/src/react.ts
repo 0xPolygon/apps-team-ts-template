@@ -1,33 +1,38 @@
-// TanStack Query options factories emitted by
-// `@polygonlabs/zod-to-openapi-heyapi`'s `tanstackReactQuery: true` option.
-// Factories split across two files by codec status:
+// TanStack Query factories emitted by `@polygonlabs/zod-to-openapi-heyapi`'s
+// `tanstackReactQuery: true` option. The plugin emits two flavours of
+// factory:
 //
-//   - `registry-validator.gen.ts` — codec ops (request input goes through a
-//     registered Zod schema). Typed against `${Op}Input` (runtime shapes —
-//     `bigint`, `Date`); codec slots pre-encoded into the queryKey.
-//   - `@tanstack/react-query.gen.ts` — non-codec ops, emitted by the
-//     upstream `@tanstack/react-query` plugin. Standard wire-shape factories
-//     typed against `${Op}Data`.
+//   - **Codec-aware Options/QueryKey** in `registry-validator.gen.ts`,
+//     typed against `${Op}Input` (runtime shapes — `bigint`, `Date`),
+//     for ops with a registered input schema. The factory pre-encodes
+//     codec slots into the queryKey so the default `JSON.stringify`-based
+//     queryKey hash stays stable for bigint inputs without requiring a
+//     custom `queryKeyHashFn` on the consumer's QueryClient.
 //
-// Both halves use the same names (`${opId}Options` / `${opId}QueryKey`), so
-// the consumer call site sees one naming scheme. Usage:
+//   - **Standard wire-shape Options/QueryKey** in `@tanstack/react-query.gen.ts`,
+//     typed against `${Op}Data`, for ops without a registered input
+//     schema. Plus `${Op}Mutation` factories for mutations.
 //
-//   import { getBlockMetadataOptions } from '@polygonlabs/example-client/react';
-//   const { data } = useQuery(getBlockMetadataOptions({ path: { blockNumber: 23000000n } }));
+// Both factory files contribute to the auto-barrel at
+// `./generated/index.js` (the plugin sets `includeInEntry: true` on
+// the upstream tanstack plugin and filters out the colliding `QueryKey`
+// alias) so the public re-export below stays a one-liner — no deep
+// `*.gen.js` reaches.
 //
-// Configure the baseUrl once at application entry via the singleton client
-// from the main entrypoint:
+// Configure the baseUrl once at application entry via the singleton
+// client from the main entrypoint:
 //
 //   import { client } from '@polygonlabs/example-client';
 //   client.setConfig({ baseUrl: env.VITE_API_URL });
 //
-// Codec round-trip: `getBlockMetadataOptions` accepts the runtime shape
-// (`bigint` for `Int64Codec`, `Date` for `IsoDateCodec`) and pre-encodes
-// codec slots into the queryKey as wire-shape strings. This keeps the
-// default `JSON.stringify`-based queryKey hash stable for bigint inputs
-// without requiring a custom `queryKeyHashFn` on the consumer's
-// QueryClient.
+//   import { getBlockMetadataOptions } from '@polygonlabs/example-client/react';
+//   const { data } = useQuery(getBlockMetadataOptions({ path: { blockNumber: 23000000n } }));
 export {
+  createMessageMutation,
+  createMessageOptions,
+  createMessageQueryKey,
+  getBlockMetadataOptions,
+  getBlockMetadataQueryKey,
   getBlockNumberOptions,
   getBlockNumberQueryKey,
   getHealthCheckOptions,
@@ -35,13 +40,8 @@ export {
   getHelloOptions,
   getHelloQueryKey,
   getMessageOptions,
-  getMessageQueryKey
-} from './generated/@tanstack/react-query.gen.ts';
-export {
-  createMessageOptions,
-  createMessageQueryKey,
-  getBlockMetadataOptions,
-  getBlockMetadataQueryKey,
+  getMessageQueryKey,
   listMessagesOptions,
-  listMessagesQueryKey
-} from './generated/registry-validator.gen.ts';
+  listMessagesQueryKey,
+  type QueryKey
+} from './generated/index.js';
