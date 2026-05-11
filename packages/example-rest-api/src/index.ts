@@ -11,12 +11,23 @@ const server = app.listen(getEnv().PORT, () => {
   logger.info({ port: getEnv().PORT, nodeEnv: getEnv().NODE_ENV }, 'server started');
 });
 
-// Graceful shutdown: stop accepting new connections, drain in-flight
-// requests, then exit. process.exit(0) inside the close callback ensures
-// the process terminates even if other handles (timers, sockets) are
-// still keeping the event loop alive.
+// Graceful shutdown: stop accepting new connections, let in-flight
+// requests finish, and set the exit code. We deliberately do NOT call
+// process.exit() — that aborts pending async work (Sentry transport
+// sends, async stdout writes to the container log collector), which
+// can drop the final error reports and log lines just before shutdown.
+//
+// Once server.close() has drained connections and no other handles are
+// keeping the event loop alive, Node exits naturally with the assigned
+// exitCode. If shutdown hangs because a library leaked a timer or
+// socket, fix the leak in that code (unref the timer, close the
+// socket) — don't paper over it by force-exiting.
+//
+// Ref: https://nodejs.org/api/process.html#processexitcode
 const shutdown = () => {
-  server.close(() => process.exit(0));
+  server.close(() => {
+    process.exitCode = 0;
+  });
 };
 
 process.on('SIGINT', shutdown);
