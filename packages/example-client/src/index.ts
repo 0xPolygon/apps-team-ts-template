@@ -10,7 +10,7 @@
 //   - `client` for `client.setConfig({ baseUrl })` at app entry
 //   - Every SDK wrapper (`getBlockNumber`, `createMessage`, …) —
 //     codec-aware via the plugin's per-op transformer
-//   - The `TransportError` / `UnknownError` classes plus their
+//   - The `TransportError` / `ResponseValidationError` classes plus their
 //     `is*Error` type-predicate guards for canonical narrowing
 //   - `WrapErrors<TData, TError, ThrowOnError>` — the wrapper's
 //     statically widened return type, surfaced for typed-error
@@ -52,13 +52,13 @@ export {
   getMessage,
   type GetMessageError,
   type GetMessageResponse,
+  isResponseValidationError,
   isTransportError,
-  isUnknownError,
   isWrapperError,
   listMessages,
   type ListMessagesInput,
   type ListMessagesResponse,
+  ResponseValidationError,
   TransportError,
-  UnknownError,
   type WrapErrors
 } from './generated/index.js';

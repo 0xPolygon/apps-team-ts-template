@@ -15,7 +15,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ZodError } from 'zod';
 
-import { TransportError, UnknownError } from '@polygonlabs/example-client';
+import { ResponseValidationError, TransportError } from '@polygonlabs/example-client';
 
 vi.mock('@sentry/react', () => {
   // Recorded calls; each test inspects them via `mocks.*` then
@@ -92,7 +92,7 @@ describe('reportApiError', () => {
     expect(mocks.captureException[0]?.error).toBe(fetchError);
   });
 
-  it('tags unknown errors with kind=unknown and attaches body + issues as Sentry context', () => {
+  it('tags response-validation errors with kind=response-validation and attaches body + issues as Sentry context', () => {
     const issues = new ZodError([
       {
         code: 'invalid_type',
@@ -103,12 +103,15 @@ describe('reportApiError', () => {
       }
     ]);
     const wireBody = { unexpected: 'shape' };
-    const err = new UnknownError(issues, wireBody);
+    const err = new ResponseValidationError(issues, wireBody);
     reportApiError(err);
-    expect(mocks.setTag).toContainEqual({ key: 'api.error.kind', value: 'unknown' });
+    expect(mocks.setTag).toContainEqual({
+      key: 'api.error.kind',
+      value: 'response-validation'
+    });
     // Engineering payload — body and Zod issues — lands as Sentry
     // context, not in the message string.
-    const ctx = mocks.setContext.find((c) => c.key === 'api.unknown');
+    const ctx = mocks.setContext.find((c) => c.key === 'api.response-validation');
     expect(ctx?.ctx.body).toEqual(wireBody);
     expect(ctx?.ctx.issues).toEqual(issues.issues);
   });

@@ -16,7 +16,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ZodError } from 'zod';
 
-import { TransportError, UnknownError } from '@polygonlabs/example-client';
+import { ResponseValidationError, TransportError } from '@polygonlabs/example-client';
 
 import { ApiErrorMessage } from '../api-error-message';
 
@@ -29,7 +29,7 @@ describe('<ApiErrorMessage />', () => {
     expect(screen.getByTestId('api-error-detail').textContent).toContain('fetch failed');
   });
 
-  it('renders unknown copy (without leaking the wire body) when given an UnknownError', () => {
+  it('renders response-validation copy (without leaking the wire body) when given a ResponseValidationError', () => {
     const issues = new ZodError([
       // Real ZodIssue shape — confirms the component reads cause
       // structurally without casts.
@@ -45,9 +45,9 @@ describe('<ApiErrorMessage />', () => {
     // so the "doesn't leak body" assertion can't pass spuriously
     // because the copy happens to contain the same words.
     const wireBody = { rawTraceId: 'abc-trace-XYZ-9999', stackHint: 'INTERNAL_PANIC' };
-    render(<ApiErrorMessage error={new UnknownError(issues, wireBody)} />);
+    render(<ApiErrorMessage error={new ResponseValidationError(issues, wireBody)} />);
     const box = screen.getByTestId('api-error');
-    expect(box.dataset.errorCategory).toBe('unknown');
+    expect(box.dataset.errorCategory).toBe('response-validation');
     // Body is engineering-only — Sentry adapter records it; the UI
     // doesn't expose it.
     expect(box.textContent ?? '').not.toContain('abc-trace');

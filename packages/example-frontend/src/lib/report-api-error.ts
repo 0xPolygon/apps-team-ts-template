@@ -19,7 +19,7 @@
  *   - Sets a `api.error.kind` tag with the discriminator value, so
  *     Sentry alerts and dashboards can filter by category without
  *     parsing the message string.
- *   - Attaches the `UnknownError.body` (wire body) and `cause.issues`
+ *   - Attaches the `ResponseValidationError.body` (wire body) and `cause.issues`
  *     (Zod parse issues) as a Sentry context — that's exactly the
  *     debugging payload an engineer triaging schema drift needs, and
  *     it isn't visible from the Sentry message alone.
@@ -85,12 +85,12 @@ export function reportApiError(
           tags: { 'api.error.cause.kind': 'native-fetch' }
         });
 
-      case 'unknown':
+      case 'response-validation':
         // Schema drift — the wire body and Zod issues are the
         // payload a triaging engineer actually needs.
-        scope.setContext('api.unknown', {
+        scope.setContext('api.response-validation', {
           body: category.error.body,
-          issues: category.error.cause.issues as readonly unknown[]
+          issues: category.error.cause.issues
         });
         return captureException(category.error);
 

@@ -4,14 +4,15 @@
  *
  * Demonstrates the **canonical narrowing pattern** the codec-aware
  * SDK wrapper enables. The wrapper return is statically widened to
- * `${Op}Error | TransportError | UnknownError | undefined`; the
+ * `${Op}Error | TransportError | ResponseValidationError | undefined`; the
  * component peels off the wrapper-error categories with the type-
  * predicate guards re-exported from `@polygonlabs/example-client`,
  * and TS flow-narrows the rest:
  *
  *   - `isTransportError(error)` → `error.cause` is `Error`. No cast.
- *   - `isUnknownError(error)` → `error.body` is `unknown`,
- *     `error.cause.issues` is the Zod issue array. No cast.
+ *   - `isResponseValidationError(error)` → `error.body` is `unknown`,
+ *     `error.cause` is the full `ZodError` (`.format()` / `.flatten()`
+ *     / `.issues` available). No cast.
  *   - Otherwise → typed `${Op}Error` (when called from a typed
  *     wrapper return) or `Error | unknown` (when called from a hook
  *     where TanStack defaults TError to `Error`). Either way the
@@ -28,7 +29,7 @@
  * assert the right category surfaced without scraping copy.
  */
 
-import { isTransportError, isUnknownError } from '@polygonlabs/example-client';
+import { isResponseValidationError, isTransportError } from '@polygonlabs/example-client';
 
 export interface ApiErrorMessageProps {
   /** Anything caught from a typed-client call. */
@@ -48,7 +49,7 @@ export const ApiErrorMessage = ({ error, testId = 'api-error' }: ApiErrorMessage
       />
     );
   }
-  if (isUnknownError(error)) {
+  if (isResponseValidationError(error)) {
     // Wire body + Zod issues are the engineering payload — the
     // Sentry adapter (see `lib/report-api-error.ts`) already records
     // them on the captured event, so the user-facing copy stays
@@ -56,7 +57,7 @@ export const ApiErrorMessage = ({ error, testId = 'api-error' }: ApiErrorMessage
     return (
       <ErrorBox
         testId={testId}
-        category="unknown"
+        category="response-validation"
         headline="The server returned an unexpected response"
         detail="We've been notified and are looking into it. Please try again shortly."
       />
@@ -107,7 +108,12 @@ export const ApiErrorMessage = ({ error, testId = 'api-error' }: ApiErrorMessage
 
 interface ErrorBoxProps {
   readonly testId: string;
-  readonly category: 'transport' | 'unknown' | 'native-error' | 'typed' | 'unrecognised';
+  readonly category:
+    | 'transport'
+    | 'response-validation'
+    | 'native-error'
+    | 'typed'
+    | 'unrecognised';
   readonly headline: string;
   readonly detail: string;
 }

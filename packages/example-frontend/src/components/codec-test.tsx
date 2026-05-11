@@ -60,7 +60,7 @@ export const CodecTest = () => {
   const [text, setText] = useState('hello from codec round-trip');
   // The imperative `createMessage` call goes through the codec-aware
   // wrapper. `r.error` is statically widened to
-  // `CreateMessageError | TransportError | UnknownError | undefined`,
+  // `CreateMessageError | TransportError | ResponseValidationError | undefined`,
   // so the rethrow surfaces at `mutation.error` carrying the
   // wrapper-narrowed shape — `<ApiErrorMessage>` then narrows it
   // via the per-client guards re-exported from `@polygonlabs/example-client`.
