@@ -41,14 +41,34 @@ import {
   listMessagesQueryKey
 } from '@polygonlabs/example-client/react';
 
+import { ApiErrorMessage } from './api-error-message';
+
 const MANAGEMENT_API_KEY = 'local-dev-secret';
 
 export const CodecTest = () => {
   const queryClient = useQueryClient();
-  const blockNumber = useQuery(getBlockNumberOptions());
-  const messages = useQuery(listMessagesOptions());
+  // `meta.operation` flows into the global QueryCache.onError handler
+  // (see `app.tsx`) for Sentry tagging. Spreading the factory's
+  // queryOptions then layering meta keeps the codec-aware factory's
+  // queryFn / queryKey / generic typing intact.
+  const blockNumber = useQuery({
+    ...getBlockNumberOptions(),
+    meta: { operation: 'getBlockNumber' }
+  });
+  const messages = useQuery({ ...listMessagesOptions(), meta: { operation: 'listMessages' } });
 
   const [text, setText] = useState('hello from codec round-trip');
+  // The imperative `createMessage` call goes through the codec-aware
+  // wrapper. `r.error` is statically widened to
+  // `CreateMessageError | TransportError | UnknownError | undefined`,
+  // so the rethrow surfaces at `mutation.error` carrying the
+  // wrapper-narrowed shape — `<ApiErrorMessage>` then narrows it
+  // via the per-client guards re-exported from `@polygonlabs/example-client`.
+  // No `as` casts at any call site.
+  //
+  // `meta.operation` is read by the global `MutationCache.onError`
+  // handler (see `app.tsx`) when reporting to Sentry — gives every
+  // captured event a stable per-call-site tag.
   const createMessageMut = useMutation({
     mutationFn: async (vars: { text: string }) => {
       const r = await createMessage({ body: { text: vars.text } });
@@ -56,7 +76,8 @@ export const CodecTest = () => {
       if (!r.data) throw new Error('createMessage returned no data');
       return r.data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: listMessagesQueryKey() })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: listMessagesQueryKey() }),
+    meta: { operation: 'createMessage' }
   });
 
   // `getBlockMetadataOptions` is the codec-aware factory emitted by
@@ -79,7 +100,8 @@ export const CodecTest = () => {
       path: { blockNumber: validBlockHeight ?? BigInt(0) },
       headers: { 'x-api-key': MANAGEMENT_API_KEY }
     }),
-    enabled: false
+    enabled: false,
+    meta: { operation: 'getBlockMetadata' }
   });
 
   return (
@@ -99,7 +121,9 @@ export const CodecTest = () => {
       <div data-testid="block-number-panel">
         <h3 className="font-medium">Int64Codec response · getBlockNumber</h3>
         {blockNumber.isPending && <p>loading…</p>}
-        {blockNumber.error && <p data-testid="block-number-error">{String(blockNumber.error)}</p>}
+        {blockNumber.error && (
+          <ApiErrorMessage testId="block-number-error" error={blockNumber.error} />
+        )}
         {blockNumber.data && (
           <p>
             type: <code data-testid="block-number-type">{typeof blockNumber.data.blockNumber}</code>{' '}
@@ -138,7 +162,7 @@ export const CodecTest = () => {
           </button>
         </form>
         {createMessageMut.error && (
-          <p data-testid="create-error">create failed: {String(createMessageMut.error)}</p>
+          <ApiErrorMessage testId="create-error" error={createMessageMut.error} />
         )}
         {createMessageMut.data && (
           <p data-testid="create-result">
@@ -198,7 +222,7 @@ export const CodecTest = () => {
         )}
         {blockMetadata.isFetching && <p>loading…</p>}
         {blockMetadata.error && (
-          <p data-testid="block-metadata-error">{String(blockMetadata.error)}</p>
+          <ApiErrorMessage testId="block-metadata-error" error={blockMetadata.error} />
         )}
         {blockMetadata.data && (
           <p data-testid="block-metadata-result">
