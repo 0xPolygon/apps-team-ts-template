@@ -1,3 +1,5 @@
+import type { UserConfig } from '@hey-api/openapi-ts';
+
 import { createRequire } from 'node:module';
 
 import { buildRegistry } from '@polygonlabs/example-schemas/registry';
@@ -16,7 +18,18 @@ const require = createRequire(import.meta.url);
 // `${Op}Input`, codec slots pre-encoded into the queryKey); non-codec ops
 // get the standard wire-shape factories from upstream. Same names across
 // both files, no collisions.
-export default await defineRegistryClientConfig({
+//
+// Explicit `UserConfig` annotation is required: composite-mode declaration
+// emit on this file (now triggered because `tsconfig.spec.json` inherits
+// `composite: true` from `tsconfig.base.json`) trips TS2742 on the
+// inferred `Promise<UserConfig>` return because `@hey-api/openapi-ts`
+// exposes `UserConfig` via a tsup-renamed re-export from a hashed
+// internal file (`./types-DAEl4_a4.mjs`). Without the annotation, TS
+// follows the symbol chain to the realpath under `.pnpm/...` and
+// refuses to bake a non-portable reference into the emitted `.d.ts`.
+// The explicit name tells TS to emit `import('@hey-api/openapi-ts').UserConfig`
+// — portable, no chain-following needed.
+const config: UserConfig = await defineRegistryClientConfig({
   registry: buildRegistry(),
   schemasFrom: '@polygonlabs/example-schemas',
   // The committed openapi.json in example-schemas is the canonical spec
@@ -26,3 +39,4 @@ export default await defineRegistryClientConfig({
   output: { path: './src/generated', clean: true },
   tanstackReactQuery: true
 });
+export default config;

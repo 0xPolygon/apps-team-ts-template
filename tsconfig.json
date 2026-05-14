@@ -1,13 +1,10 @@
 {
-  "extends": ["@tsconfig/node24", "@tsconfig/node-ts"],
-  "compilerOptions": {
-    "noEmit": true,
-    "noUncheckedSideEffectImports": true,
-    "customConditions": ["@polygonlabs/source"]
-  },
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
   "references": [
-    { "path": "./packages/example-schemas/tsconfig.build.json" },
-    { "path": "./packages/example-client/tsconfig.build.json" },
+    { "path": "./packages/example-schemas" },
+    { "path": "./packages/example-client" },
     { "path": "./packages/example-rest-api" },
     { "path": "./packages/example-frontend" }
   ]

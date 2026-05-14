@@ -19,10 +19,10 @@
     "./openapi.json": "./openapi.json"
   },
   "scripts": {
-    "build": "pnpm run typecheck && tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
-    "build:clean": "pnpm run typecheck && rm -rf dist *.tsbuildinfo && tsc -p tsconfig.build.json && node scripts/generate-spec.ts",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules *.tsbuildinfo"
+    "build": "pnpm run typecheck && tsc -b tsconfig.lib.json && node --conditions=@polygonlabs/source scripts/generate-spec.ts",
+    "build:clean": "pnpm run typecheck && rm -rf dist out-tsc *.tsbuildinfo && tsc -b tsconfig.lib.json && node --conditions=@polygonlabs/source scripts/generate-spec.ts",
+    "typecheck": "tsc -b",
+    "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.1",

@@ -1,3 +1,5 @@
+import type { Router as RouterType } from 'express';
+
 import { apiReference } from '@scalar/express-api-reference';
 import { Router } from 'express';
 
@@ -6,7 +8,7 @@ import { Router } from 'express';
 // the runtime spec identical to what consumers depend on.
 import spec from '@polygonlabs/example-schemas/openapi.json' with { type: 'json' };
 
-const router = Router();
+const router: RouterType = Router();
 
 router.get('/openapi.json', (_req, res) => {
   res.json(spec);

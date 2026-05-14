@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules *.tsbuildinfo"
+    "typecheck": "tsc -b",
+    "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },
   "dependencies": {
     "@0xsequence/connect": "^6.0.0",
