@@ -1,5 +1,123 @@
 # @polygonlabs/example-client
 
+## 0.4.0
+
+### Minor Changes
+
+- cbe1639: Adopt the codec-aware TanStack Query factories from
+  `@polygonlabs/zod-to-openapi-heyapi` v1.2's new `tanstackReactQuery: true`
+  option (wired via the new `defineRegistryClientConfig` factory). The
+  factory installs the upstream `@hey-api/openapi-ts`
+  `@tanstack/react-query` plugin alongside the registry plugin, with a
+  parser-level `isQuery: false` hook scoped to codec op ids — so codec
+  ops get factories from the registry plugin (typed against `${Op}Input`,
+  codec slots pre-encoded into the queryKey) and non-codec ops keep the
+  standard wire-shape factories from upstream. Same names across both
+  emissions, no collisions.
+
+  ```ts
+  useQuery(getBlockMetadataOptions({ path: { blockNumber: 23000000n } }));
+  ```
+
+  `getBlockMetadataOptions` and other codec-aware factories are now
+  exported from `@polygonlabs/example-client/react`, which split-imports
+  the codec-ops half from `registry-validator.gen.ts` and the non-codec
+  half from `@tanstack/react-query.gen.ts`. Codec slots in the queryKey
+  are pre-encoded synchronously (`z.encode(Schema, value)`), so the
+  default `JSON.stringify`-based queryKeyHashFn stays stable for `bigint`
+  inputs without consumer-side ceremony — the bigint-aware
+  `queryKeyHashFn` override on the example-frontend `QueryClient` has
+  been removed.
+
+  The codec-test panel uses the canonical factory directly via
+  `useQuery({ ...getBlockMetadataOptions(...), enabled: false })` and
+  guards `BigInt(blockHeight)` against empty / non-numeric input so an
+  invalid value disables the fetch button instead of crashing the
+  panel during render.
+
+- 956d94c: Re-export the per-client wrapper-error narrowing surface from the package
+  entry: `TransportError`, `UnknownError`, `isTransportError`,
+  `isUnknownError`, `isWrapperError`. Consumers can now narrow a typed-client
+  result's `error` without reaching into `./generated/*.gen.js`.
+
+  These are the codegen-emitted, per-client guards from
+  `@polygonlabs/zod-to-openapi-heyapi` v1.3 (every wrapper return is
+  statically widened to `${Op}Error | TransportError | UnknownError`).
+  Cross-client / logging-adapter helpers still live at
+  `@polygonlabs/zod-to-openapi-heyapi/errors` (`categorizeApiError`,
+  `getApiErrorMessage`, structural classes/types) — use the per-client
+  guards in component code where the wrapper return type is in scope, and
+  the cross-client helper in adapters that route on category without
+  caring which operation produced the error.
+
+  ```ts
+  import { isTransportError, isUnknownError } from '@polygonlabs/example-client';
+
+  if (isTransportError(error)) {
+    /* error.cause is Error — no cast */
+  }
+  if (isUnknownError(error)) {
+    /* error.body is unknown, cause.issues is ZodIssue[] */
+  }
+  ```
+
+  Also regenerates `src/generated/**` against plugin v1.3 — picks up the
+  `WrapErrors<TData, TError, ThrowOnError>` widening on every wrapper
+  return type, the `instanceof Error` discrimination in the runtime
+  guards, and the `Symbol.for(...)` identity markers on the error
+  classes (cross-realm-safe `instanceof` substitute).
+
+### Patch Changes
+
+- 7a5b161: Route the hand-written barrel (`src/index.ts`, `src/react.ts`) entirely
+  through `./generated/index.js` — no more deep `*.gen.ts` reaches. With
+  `@polygonlabs/zod-to-openapi-heyapi@1.3.0`'s completed auto-barrel
+  (`includeInEntry: true` on `@hey-api/client-fetch` and the upstream
+  `@tanstack/react-query` plugin, with the colliding `QueryKey` alias
+  filtered out), the singleton `client`, every SDK wrapper, the
+  wrapper-error classes + guards, and every TanStack Query factory
+  (codec-aware and standard) all flow through the auto-generated
+  canonical entry. Consumers wiring up a publishable client package
+  should treat `./generated/index.js` as the single import target —
+  the layout under `./generated/` (which file owns which op, where the
+  singleton lives) is an internal codegen concern they shouldn't have
+  to know about.
+- 95385cf: Adopt the chainable `TypedRegistry` API from `@polygonlabs/openapi-registry` v2 and the `HandlerMapFor` pattern from `@polygonlabs/express` v2.
+
+  ## Breaking changes
+
+  `@polygonlabs/example-schemas` now composes its registry by chaining `registerPath`, `registerSecurityScheme`, and `with(fn)` on a single inferred-return `TypedRegistry`, instead of the earlier statement-form `registry.registerPath(...); registry.extend(fn);` pattern. The exported `Operations` type is now derived via `OperationsOf<typeof buildRegistry>` from `@polygonlabs/openapi-registry` rather than a hand-rolled conditional type.
+
+  Per-domain route helpers under `src/routes/` are now generic over both `Ops` and `Schemes`, take a `TypedRegistry`, chain registrations, and return the chain's final value.
+
+  ## Why
+
+  The new chainable shape removes the function-wrapper-plus-explicit-annotation requirement that the asserts-based API needed for the operation narrow to flow across the export boundary. Consumers can write `export const buildRegistry = () => new TypedRegistry().registerPath(...).with(...)` directly and the inferred return carries the full manifest. `OperationsOf` brands the empty-manifest case as a type-level error, which surfaces the silent failure where every chain return was discarded.
+
+  `example-rest-api` handlers switch from `defineHandlers<Operations, AppAuthMap>()({ ... })` to `({ ... }) satisfies Partial<HandlerMapFor<typeof buildRegistry, AppAuthMap>>`. `HandlerMapFor` reads the registry-builder type directly so handler bags stay in sync with the registry without an intermediate `Operations` import.
+
+  See `apps-team-packages/packages/openapi-registry/MIGRATION.md` for the full migration playbook.
+
+- 725f6ba: Follow `@polygonlabs/zod-to-openapi-heyapi`'s rename of `UnknownError`
+  to `ResponseValidationError`. The new name describes the layer the
+  failure happened in (response-side validation), symmetric with
+  `TransportError` (transport-layer failure) and unambiguous against
+  request-side `z.encode` failures the plugin also runs.
+  - `packages/example-client` re-exports `ResponseValidationError` and
+    `isResponseValidationError` (replacing the old names).
+  - `packages/example-frontend`'s `<ApiErrorMessage>` narrows via
+    `isResponseValidationError` and tags the rendered alert with
+    `data-error-category="response-validation"`.
+  - `reportApiError` (Sentry adapter) tags events with
+    `api.error.kind: response-validation` and attaches the wire body +
+    full `ZodError` under `api.response-validation`. The structural
+    `ResponseValidationError.cause` type from the plugin's `/errors`
+    subpath is now the full `ZodError`, so `.format()` / `.flatten()` /
+    `.issues` are reachable without a cast.
+
+- Updated dependencies [95385cf]
+  - @polygonlabs/example-schemas@1.0.0
+
 ## 0.3.0
 
 ### Minor Changes

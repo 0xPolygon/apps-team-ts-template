@@ -1,5 +1,92 @@
 # example-frontend
 
+## 1.0.5
+
+### Patch Changes
+
+- 9cea326: Demonstrate the canonical wrapper-error narrowing pattern end-to-end:
+  - A new `<ApiErrorMessage>` component (`src/components/api-error-message.tsx`)
+    consumes per-client guards re-exported from `@polygonlabs/example-client`
+    (`isTransportError`, `isUnknownError`) and TS flow-narrows the rest.
+    No `as` casts, no schema imports at the UI layer — just the wrapper
+    return type. Stable `data-error-category` attribute on the rendered
+    alert routes Playwright assertions and Sentry telemetry without
+    scraping copy.
+  - A new `reportApiError` Sentry adapter (`src/lib/report-api-error.ts`)
+    uses the cross-client `categorizeApiError` helper from
+    `@polygonlabs/zod-to-openapi-heyapi/errors` (not the per-client guards)
+    — that's the canonical split: per-client guards in component code
+    where the wrapper return type is in scope; the cross-client helper
+    in adapters that route on category without caring which operation
+    produced the error. Tags every Sentry event with
+    `api.error.kind: transport | unknown | native-error | other` so
+    dashboards can filter without parsing messages, and attaches the
+    wire body + Zod issues as a Sentry context for the `unknown`
+    (schema-drift) category.
+  - Wired into the global `QueryCache.onError` /
+    `MutationCache.onError` in `src/app.tsx`; the `codec-test` panel
+    passes `meta.operation` per call site so every Sentry event
+    carries a stable per-operation tag without per-component plumbing.
+
+  Unit coverage: 6 tests pin the `<ApiErrorMessage>` narrowing pattern
+  (structurally-real fixtures, no schema imports), 4 tests pin the
+  `reportApiError` category → tag mapping.
+
+- cbe1639: Adopt the codec-aware TanStack Query factories from
+  `@polygonlabs/zod-to-openapi-heyapi` v1.2's new `tanstackReactQuery: true`
+  option (wired via the new `defineRegistryClientConfig` factory). The
+  factory installs the upstream `@hey-api/openapi-ts`
+  `@tanstack/react-query` plugin alongside the registry plugin, with a
+  parser-level `isQuery: false` hook scoped to codec op ids — so codec
+  ops get factories from the registry plugin (typed against `${Op}Input`,
+  codec slots pre-encoded into the queryKey) and non-codec ops keep the
+  standard wire-shape factories from upstream. Same names across both
+  emissions, no collisions.
+
+  ```ts
+  useQuery(getBlockMetadataOptions({ path: { blockNumber: 23000000n } }));
+  ```
+
+  `getBlockMetadataOptions` and other codec-aware factories are now
+  exported from `@polygonlabs/example-client/react`, which split-imports
+  the codec-ops half from `registry-validator.gen.ts` and the non-codec
+  half from `@tanstack/react-query.gen.ts`. Codec slots in the queryKey
+  are pre-encoded synchronously (`z.encode(Schema, value)`), so the
+  default `JSON.stringify`-based queryKeyHashFn stays stable for `bigint`
+  inputs without consumer-side ceremony — the bigint-aware
+  `queryKeyHashFn` override on the example-frontend `QueryClient` has
+  been removed.
+
+  The codec-test panel uses the canonical factory directly via
+  `useQuery({ ...getBlockMetadataOptions(...), enabled: false })` and
+  guards `BigInt(blockHeight)` against empty / non-numeric input so an
+  invalid value disables the fetch button instead of crashing the
+  panel during render.
+
+- 725f6ba: Follow `@polygonlabs/zod-to-openapi-heyapi`'s rename of `UnknownError`
+  to `ResponseValidationError`. The new name describes the layer the
+  failure happened in (response-side validation), symmetric with
+  `TransportError` (transport-layer failure) and unambiguous against
+  request-side `z.encode` failures the plugin also runs.
+  - `packages/example-client` re-exports `ResponseValidationError` and
+    `isResponseValidationError` (replacing the old names).
+  - `packages/example-frontend`'s `<ApiErrorMessage>` narrows via
+    `isResponseValidationError` and tags the rendered alert with
+    `data-error-category="response-validation"`.
+  - `reportApiError` (Sentry adapter) tags events with
+    `api.error.kind: response-validation` and attaches the wire body +
+    full `ZodError` under `api.response-validation`. The structural
+    `ResponseValidationError.cause` type from the plugin's `/errors`
+    subpath is now the full `ZodError`, so `.format()` / `.flatten()` /
+    `.issues` are reachable without a cast.
+
+- Updated dependencies [7a5b161]
+- Updated dependencies [95385cf]
+- Updated dependencies [cbe1639]
+- Updated dependencies [725f6ba]
+- Updated dependencies [956d94c]
+  - @polygonlabs/example-client@0.4.0
+
 ## 1.0.4
 
 ### Patch Changes
