@@ -3,6 +3,7 @@ import { useConnection, useDisconnect } from 'wagmi';
 import { useOpenConnectModal } from '@0xsequence/connect';
 
 import { useWallet } from '../hooks/use-wallet';
+import { CodecTest } from './codec-test';
 import { ScwBanner } from './scw-banner';
 import { SendNative } from './send-native';
 import { Button } from './ui/button';
@@ -29,15 +30,18 @@ export const HomeContent = () => {
       </header>
 
       <main className="flex flex-1 justify-center px-6 pt-10">
-        {isConnected ? (
-          <div className="flex w-full max-w-lg flex-col gap-6">
-            {showScwBanner && <ScwBanner />}
-            <WalletDetails />
-            <SendNative />
-          </div>
-        ) : (
-          <p className="text-grey">Connect a wallet to get started.</p>
-        )}
+        <div className="flex w-full max-w-lg flex-col gap-6">
+          <CodecTest />
+          {isConnected ? (
+            <>
+              {showScwBanner && <ScwBanner />}
+              <WalletDetails />
+              <SendNative />
+            </>
+          ) : (
+            <p className="text-grey">Connect a wallet to get started.</p>
+          )}
+        </div>
       </main>
     </div>
   );

@@ -6,14 +6,13 @@
  *     causes the response validator to encode against the 404 schema.
  */
 
-import type { Operations } from '@polygonlabs/example-schemas';
-
-import { defineHandlers } from '@polygonlabs/express/registry';
+import type { buildRegistry } from '@polygonlabs/example-schemas';
+import type { HandlerMapFor } from '@polygonlabs/express/registry';
 
 import type { MessageStore } from '../services/MessageStore.ts';
 
-export function buildMessageHandlers(store: MessageStore) {
-  return defineHandlers<Operations>()({
+export const buildMessageHandlers = (store: MessageStore) =>
+  ({
     createMessage: (req, res) => {
       const message = store.create(req.body.text);
       res.json(message);
@@ -32,5 +31,4 @@ export function buildMessageHandlers(store: MessageStore) {
       }
       res.json(message);
     }
-  });
-}
+  }) satisfies Partial<HandlerMapFor<typeof buildRegistry>>;

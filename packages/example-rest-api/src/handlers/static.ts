@@ -1,16 +1,17 @@
 /**
  * Static handlers — operations with no dependencies. Exposed as a typed
- * partial via `defineHandlers<Operations>()` so `.implement(...)` enforces
- * exhaustive composition across all handler modules at compile time.
+ * partial via `satisfies Partial<HandlerMapFor<…>>` so `.implement(...)`
+ * enforces exhaustive composition across all handler modules at compile
+ * time.
  */
 
-import type { Operations } from '@polygonlabs/example-schemas';
+import type { buildRegistry } from '@polygonlabs/example-schemas';
+import type { HandlerMapFor } from '@polygonlabs/express/registry';
 
 import { getLogger } from '@polygonlabs/express';
-import { defineHandlers } from '@polygonlabs/express/registry';
 
-export function buildStaticHandlers() {
-  return defineHandlers<Operations>()({
+export const buildStaticHandlers = () =>
+  ({
     getHealthCheck: (_req, res) => {
       res.json({ success: true });
     },
@@ -18,5 +19,4 @@ export function buildStaticHandlers() {
       getLogger().debug('hello endpoint called');
       res.json({ message: 'Hello, world!' });
     }
-  });
-}
+  }) satisfies Partial<HandlerMapFor<typeof buildRegistry>>;
