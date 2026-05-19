@@ -1,4 +1,4 @@
-import type { Router as RouterType } from 'express';
+import type { RequestHandler, Router as RouterType } from 'express';
 
 import { apiReference } from '@scalar/express-api-reference';
 import { Router } from 'express';
@@ -14,6 +14,16 @@ router.get('/openapi.json', (_req, res) => {
   res.json(spec);
 });
 
-router.use('/docs', apiReference({ content: spec }));
+// Scalar serves an HTML shell that loads its own JS from jsDelivr and runs
+// an inline init script. Helmet's default Content-Security-Policy
+// (`script-src 'self'`) blocks both, leaving /docs as a blank page in the
+// browser. Strip CSP for /docs only; every other route keeps the global
+// CSP intact.
+const allowScalarScripts: RequestHandler = (_req, res, next) => {
+  res.removeHeader('Content-Security-Policy');
+  next();
+};
+
+router.use('/docs', allowScalarScripts, apiReference({ content: spec }));
 
 export { router as openApiRouter };
