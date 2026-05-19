@@ -14,26 +14,31 @@ export {
   HelloResponse,
   Message,
   MessageList,
-  NotFound,
-  RecentMessagesQuery,
-  ValidationError
+  RecentMessagesQuery
 } from './schemas.ts';
 
-// Re-export the canonical error response schema from
-// `@polygonlabs/openapi-registry/error-schemas`. It matches what
-// `createErrorHandler` from `@polygonlabs/express` actually emits, so
-// declaring it on every operation's 4xx / 5xx response slots keeps the
-// served spec, the runtime body, and the typed client in lockstep with
-// no per-service drift. The subpath has zero Express-runtime imports —
-// this re-export adds no transitive runtime weight to the codegen'd
-// client or the frontend.
+// Re-export the canonical error response schemas from
+// `@polygonlabs/openapi-registry/error-schemas`. The registry's
+// `TypedRegistry.registerPath` auto-injects these into every route's
+// `responses` based on what the route declares — `ErrorResponse` for
+// 5xx (always) and 401 (when `security` is declared), and
+// `ValidationErrorResponse` for 400 (when any of `request.{params,
+// query, body, headers}` is declared). The shapes exactly match what
+// `createErrorHandler` and the request validator from
+// `@polygonlabs/express` actually emit, so the served spec, the
+// runtime body, and the typed client agree without per-service drift.
+//
+// The subpath has zero Express-runtime imports — these re-exports add
+// no transitive runtime weight to the codegen'd client or the frontend.
 //
 // Renamed to drop the `Schema` suffix so the binding matches the
-// OpenAPI registered name (`ErrorResponse`). The
-// `@polygonlabs/zod-to-openapi-heyapi` plugin's codegen-time audit
-// fails the build if the export name doesn't match the registered
-// name.
-export { ErrorResponseSchema as ErrorResponse } from '@polygonlabs/openapi-registry/error-schemas';
+// OpenAPI registered name (`ErrorResponse` / `ValidationErrorResponse`).
+// The `@polygonlabs/zod-to-openapi-heyapi` plugin's codegen-time audit
+// fails the build if the export name doesn't match the registered name.
+export {
+  ErrorResponseSchema as ErrorResponse,
+  ValidationErrorResponseSchema as ValidationErrorResponse
+} from '@polygonlabs/openapi-registry/error-schemas';
 
 // Registry composition — `buildRegistry` is a chained `TypedRegistry`
 // builder; every chain step's narrow flows through the inferred return

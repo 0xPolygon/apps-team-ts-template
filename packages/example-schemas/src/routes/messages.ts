@@ -8,14 +8,9 @@ import { z } from 'zod';
 
 import type { RouteWithOpId, TypedRegistry } from '@polygonlabs/openapi-registry';
 
-import {
-  CreateMessageRequest,
-  Message,
-  MessageList,
-  NotFound,
-  RecentMessagesQuery,
-  ValidationError
-} from '../schemas.ts';
+import { ErrorResponseSchema as ErrorResponse } from '@polygonlabs/openapi-registry/error-schemas';
+
+import { CreateMessageRequest, Message, MessageList, RecentMessagesQuery } from '../schemas.ts';
 
 export const addMessageRoutes = <
   Ops extends Record<string, RouteWithOpId>,
@@ -24,6 +19,10 @@ export const addMessageRoutes = <
   r: TypedRegistry<Ops, Schemes>
 ) =>
   r
+    // 400 (request validation failure) is auto-injected by the registry
+    // from `request.body`; the canonical `ValidationErrorResponse` shape
+    // it carries is what `@polygonlabs/express`'s request validator
+    // actually emits.
     .registerPath({
       operationId: 'createMessage',
       method: 'post',
@@ -36,10 +35,6 @@ export const addMessageRoutes = <
         200: {
           description: 'Message created',
           content: { 'application/json': { schema: Message } }
-        },
-        400: {
-          description: 'Invalid request',
-          content: { 'application/json': { schema: ValidationError } }
         }
       }
     })
@@ -66,6 +61,10 @@ export const addMessageRoutes = <
         }
       }
     })
+    // 400 (path UUID validation failure) is auto-injected from
+    // `request.params`. 404 is handler-emitted (`NotFound` from
+    // `@polygonlabs/verror`), so it's declared explicitly with the
+    // canonical `ErrorResponse` shape.
     .registerPath({
       operationId: 'getMessage',
       method: 'get',
@@ -81,7 +80,7 @@ export const addMessageRoutes = <
         },
         404: {
           description: 'Not found',
-          content: { 'application/json': { schema: NotFound } }
+          content: { 'application/json': { schema: ErrorResponse } }
         }
       }
     });

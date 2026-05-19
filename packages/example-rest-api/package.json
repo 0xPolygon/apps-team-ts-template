@@ -14,10 +14,10 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.1",
     "@polygonlabs/example-schemas": "workspace:*",
-    "@polygonlabs/express": "^2.0.0",
+    "@polygonlabs/express": "^3.0.0",
     "@polygonlabs/logger": "^2.1.0",
-    "@polygonlabs/openapi-registry": "^2.0.0",
-    "@polygonlabs/verror": "^1.0.3",
+    "@polygonlabs/openapi-registry": "^2.1.0",
+    "@polygonlabs/verror": "^1.0.4",
     "@scalar/express-api-reference": "^0.8.46",
     "@sentry/node": "^10.0.0",
     "@t3-oss/env-core": "^0.13.10",

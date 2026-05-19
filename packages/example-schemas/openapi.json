@@ -31,6 +31,31 @@
           "success"
         ]
       },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "info": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "error",
+          "message"
+        ],
+        "description": "Standard error response shape from `@polygonlabs/express`'s `createErrorHandler`. `info` is present when the underlying `HTTPError` carries structured info (e.g. validation failures, domain-specific context); absent for plain errors and most non-validation HTTPErrors."
+      },
       "HelloResponse": {
         "type": "object",
         "properties": {
@@ -82,7 +107,7 @@
         ],
         "description": "Block header metadata for a specific height"
       },
-      "ErrorResponse": {
+      "ValidationErrorResponse": {
         "type": "object",
         "properties": {
           "error": {
@@ -95,35 +120,60 @@
             "type": "string"
           },
           "info": {
+            "$ref": "#/components/schemas/ValidationErrorInfo"
+          }
+        },
+        "required": [
+          "error",
+          "message",
+          "info"
+        ],
+        "description": "Narrowed `ErrorResponse` for 400s emitted by the registry-driven router when request validation fails. `info` is non-optional and carries the section-keyed `ValidationErrorInfo` shape."
+      },
+      "ValidationErrorInfo": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "$ref": "#/components/schemas/ZodErrorTree"
+          },
+          "query": {
+            "$ref": "#/components/schemas/ZodErrorTree"
+          },
+          "body": {
+            "$ref": "#/components/schemas/ZodErrorTree"
+          },
+          "headers": {
+            "$ref": "#/components/schemas/ZodErrorTree"
+          }
+        },
+        "description": "Section-keyed map of request validation failures. Only sections that failed appear; each value is the `z.treeifyError` tree for that section. Clients can wire e.g. `info.body.properties.label.errors[0]` directly into field-level UI feedback rather than walking a flat issue list."
+      },
+      "ZodErrorTree": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "properties": {
             "type": "object",
             "additionalProperties": {
-              "nullable": true
+              "$ref": "#/components/schemas/ZodErrorTree"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZodErrorTree"
             }
           }
         },
         "required": [
-          "error",
-          "message"
+          "errors"
         ],
-        "description": "Standard error response shape from `@polygonlabs/express`'s `createErrorHandler`. `info` is present when the underlying `HTTPError` carries structured info (e.g. validation failures, domain-specific context); absent for plain errors and most non-validation HTTPErrors."
-      },
-      "NotFound": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "boolean",
-            "enum": [
-              true
-            ]
-          },
-          "message": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "error",
-          "message"
-        ]
+        "description": "Recursive Zod validation error tree (the output of `z.treeifyError`). `errors` carries the messages at this node; `properties` keys nested object errors by field name; `items` indexes nested array errors."
       },
       "Message": {
         "type": "object",
@@ -145,52 +195,6 @@
           "id",
           "text",
           "createdAt"
-        ]
-      },
-      "ValidationError": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "boolean",
-            "enum": [
-              true
-            ]
-          },
-          "message": {
-            "type": "string"
-          },
-          "issues": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "number"
-                      }
-                    ]
-                  }
-                },
-                "message": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "path",
-                "message"
-              ]
-            }
-          }
-        },
-        "required": [
-          "error",
-          "message"
         ]
       },
       "CreateMessageRequest": {
@@ -243,6 +247,16 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -258,6 +272,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -277,6 +301,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BlockNumberResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -316,8 +350,18 @@
               }
             }
           },
+          "400": {
+            "description": "Request failed schema validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Missing or invalid x-api-key header",
+            "description": "Missing or invalid credentials.",
             "content": {
               "application/json": {
                 "schema": {
@@ -331,7 +375,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotFound"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -364,11 +418,21 @@
             }
           },
           "400": {
-            "description": "Invalid request",
+            "description": "Request failed schema validation.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -407,6 +471,26 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Request failed schema validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -437,12 +521,32 @@
               }
             }
           },
+          "400": {
+            "description": "Request failed schema validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotFound"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }

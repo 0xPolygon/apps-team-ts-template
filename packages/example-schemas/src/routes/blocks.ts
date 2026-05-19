@@ -10,7 +10,7 @@ import type { RouteWithOpId, TypedRegistry } from '@polygonlabs/openapi-registry
 // name. Re-exported under the same alias from the package barrel.
 import { ErrorResponseSchema as ErrorResponse } from '@polygonlabs/openapi-registry/error-schemas';
 
-import { BlockMetadata, BlockNumberPathParams, BlockNumberResponse, NotFound } from '../schemas.ts';
+import { BlockMetadata, BlockNumberPathParams, BlockNumberResponse } from '../schemas.ts';
 
 /**
  * Generic over the parent's `Ops` and `Schemes` so this helper preserves
@@ -49,7 +49,11 @@ export const addBlockRoutes = <
     // Also gated by ApiKeyAuth — exercises the registry router's auth
     // flow. Without a valid x-api-key header the request fails with 401
     // BEFORE the path codec runs, so the response validator never sees a
-    // decoded bigint.
+    // decoded bigint. The 400 (path codec rejection) and 401 (auth
+    // failure) response slots are auto-injected by the registry from
+    // `request.params` and `security` respectively; only the 404 needs
+    // declaring here because it's emitted by the handler, not the
+    // framework.
     .registerPath({
       operationId: 'getBlockMetadata',
       method: 'get',
@@ -65,13 +69,9 @@ export const addBlockRoutes = <
           description: 'Block metadata',
           content: { 'application/json': { schema: BlockMetadata } }
         },
-        401: {
-          description: 'Missing or invalid x-api-key header',
-          content: { 'application/json': { schema: ErrorResponse } }
-        },
         404: {
           description: 'Block not found',
-          content: { 'application/json': { schema: NotFound } }
+          content: { 'application/json': { schema: ErrorResponse } }
         }
       }
     });

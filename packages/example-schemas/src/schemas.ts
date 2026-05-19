@@ -90,30 +90,15 @@ export const CreateMessageRequest = z
   })
   .openapi('CreateMessageRequest');
 
-// Standard error response shapes. The structured `issues` field on
-// ValidationError lets callers surface field-level validation feedback when
-// a request fails the server's registry-driven request schema.
-export const ValidationError = z
-  .object({
-    error: z.literal(true),
-    message: z.string(),
-    issues: z
-      .array(
-        z.object({
-          path: z.array(z.union([z.string(), z.number()])),
-          message: z.string()
-        })
-      )
-      .optional()
-  })
-  .openapi('ValidationError');
-
-export const NotFound = z
-  .object({
-    error: z.literal(true),
-    message: z.string()
-  })
-  .openapi('NotFound');
+// Error response shapes are not hand-rolled here. The registry-driven
+// router in `@polygonlabs/express` auto-injects the canonical
+// `ErrorResponse` (for 401/5xx) and `ValidationErrorResponse` (for 400)
+// shapes into every route's `responses` based on what the route
+// declares — so the served spec, the runtime body, and the generated
+// client agree without per-route boilerplate. See
+// `@polygonlabs/openapi-registry`'s `inferStandardErrorResponses`.
+// Handler-emitted statuses (404 from `NotFound` throws, 403 from
+// authz checks, etc.) declare `ErrorResponse` explicitly at the route.
 
 // ── Input schemas (request side) ──────────────────────────────────────────────
 //

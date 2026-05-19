@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import type { Client, Options as Options2, TDataShape } from './client/index.js';
-import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
+import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberErrors, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckErrors, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloErrors, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type ListMessagesErrors, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
 import type { CreateMessageData, GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, ListMessagesData } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
@@ -22,7 +22,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * Liveness check
  */
-export const getHealthCheck = <ThrowOnError extends boolean = false>(options?: Options<GetHealthCheckData, ThrowOnError>) => (options?.client ?? client).get<GetHealthCheckResponses, unknown, ThrowOnError>({
+export const getHealthCheck = <ThrowOnError extends boolean = false>(options?: Options<GetHealthCheckData, ThrowOnError>) => (options?.client ?? client).get<GetHealthCheckResponses, GetHealthCheckErrors, ThrowOnError>({
     responseTransformer: getHealthCheckTransformer,
     url: '/health-check',
     ...options
@@ -31,7 +31,7 @@ export const getHealthCheck = <ThrowOnError extends boolean = false>(options?: O
 /**
  * Hello world
  */
-export const getHello = <ThrowOnError extends boolean = false>(options?: Options<GetHelloData, ThrowOnError>) => (options?.client ?? client).get<GetHelloResponses, unknown, ThrowOnError>({
+export const getHello = <ThrowOnError extends boolean = false>(options?: Options<GetHelloData, ThrowOnError>) => (options?.client ?? client).get<GetHelloResponses, GetHelloErrors, ThrowOnError>({
     responseTransformer: getHelloTransformer,
     url: '/api/hello',
     ...options
@@ -42,7 +42,7 @@ export const getHello = <ThrowOnError extends boolean = false>(options?: Options
  *
  * Returns the latest block number from the configured RPC endpoint.
  */
-export const getBlockNumber = <ThrowOnError extends boolean = false>(options?: Options<GetBlockNumberData, ThrowOnError>) => (options?.client ?? client).get<GetBlockNumberResponses, unknown, ThrowOnError>({
+export const getBlockNumber = <ThrowOnError extends boolean = false>(options?: Options<GetBlockNumberData, ThrowOnError>) => (options?.client ?? client).get<GetBlockNumberResponses, GetBlockNumberErrors, ThrowOnError>({
     responseTransformer: getBlockNumberTransformer,
     url: '/api/block-number',
     ...options
@@ -63,7 +63,7 @@ export const getBlockMetadata = <ThrowOnError extends boolean = false>(options: 
 /**
  * List messages
  */
-export const listMessages = <ThrowOnError extends boolean = false>(options?: Options<ListMessagesData, ThrowOnError>) => (options?.client ?? client).get<ListMessagesResponses, unknown, ThrowOnError>({
+export const listMessages = <ThrowOnError extends boolean = false>(options?: Options<ListMessagesData, ThrowOnError>) => (options?.client ?? client).get<ListMessagesResponses, ListMessagesErrors, ThrowOnError>({
     responseTransformer: listMessagesTransformer,
     url: '/api/messages',
     ...options
