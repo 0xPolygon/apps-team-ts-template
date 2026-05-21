@@ -1,8 +1,5 @@
-import { useConnection, useDisconnect } from 'wagmi';
+import { usePolygonWallet } from '@polygonlabs/wallet-kit';
 
-import { useOpenConnectModal } from '@0xsequence/connect';
-
-import { useWallet } from '../hooks/use-wallet';
 import { CodecTest } from './codec-test';
 import { ScwBanner } from './scw-banner';
 import { SendNative } from './send-native';
@@ -10,12 +7,7 @@ import { Button } from './ui/button';
 import { WalletDetails } from './wallet-details';
 
 export const HomeContent = () => {
-  const { address, isConnected } = useConnection();
-  const { mutate: disconnect } = useDisconnect();
-  const { setOpenConnectModal } = useOpenConnectModal();
-  const { isSmartContractWallet, isSequenceWallet } = useWallet(address);
-
-  const showScwBanner = isConnected && isSmartContractWallet && !isSequenceWallet;
+  const { isConnected, isExternalSmartContractWallet, connect, disconnect } = usePolygonWallet();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -23,7 +15,7 @@ export const HomeContent = () => {
         <h1 className="text-3xl font-medium tracking-wide text-grey">Frontend Template</h1>
         <Button
           variant={isConnected ? 'danger' : 'primary'}
-          onClick={isConnected ? () => disconnect() : () => setOpenConnectModal(true)}
+          onClick={isConnected ? disconnect : connect}
         >
           {isConnected ? 'Disconnect' : 'Connect'}
         </Button>
@@ -34,7 +26,7 @@ export const HomeContent = () => {
           <CodecTest />
           {isConnected ? (
             <>
-              {showScwBanner && <ScwBanner />}
+              {isExternalSmartContractWallet && <ScwBanner />}
               <WalletDetails />
               <SendNative />
             </>
