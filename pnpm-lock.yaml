@@ -198,13 +198,13 @@ importers:
         version: link:../example-schemas
       '@polygonlabs/express':
         specifier: ^3.0.0
-        version: 3.0.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@polygonlabs/logger@2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3))(@polygonlabs/openapi-registry@2.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6))(@polygonlabs/verror@1.0.4)(express@5.2.1)(zod@4.3.6)
+        version: 3.0.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@polygonlabs/logger@2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3))(@polygonlabs/openapi-registry@2.1.1(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6))(@polygonlabs/verror@1.0.4)(express@5.2.1)(zod@4.3.6)
       '@polygonlabs/logger':
         specifier: ^2.1.0
         version: 2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3)
       '@polygonlabs/openapi-registry':
-        specifier: ^2.1.0
-        version: 2.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
+        specifier: ^2.1.1
+        version: 2.1.1(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
       '@polygonlabs/verror':
         specifier: ^1.0.4
         version: 1.0.4
@@ -279,8 +279,8 @@ importers:
         specifier: ^8.4.1
         version: 8.4.2(zod@4.3.6)
       '@polygonlabs/openapi-registry':
-        specifier: ^2.1.0
-        version: 2.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
+        specifier: ^2.1.1
+        version: 2.1.1(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
       '@polygonlabs/zod-codecs':
         specifier: ^1.1.0
         version: 1.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
@@ -1629,8 +1629,8 @@ packages:
       pino-pretty:
         optional: true
 
-  '@polygonlabs/openapi-registry@2.1.0':
-    resolution: {integrity: sha512-+u2cq9aEg8J903YqTrXbh/jre18UTQJEn7MmqYC+N/NQlxGuTLLRfMeDns3RuU2Q8Ooar7zgqjhBo72DlERtQg==}
+  '@polygonlabs/openapi-registry@2.1.1':
+    resolution: {integrity: sha512-WLpIBZTUYCzs763B3V6lTonx0MlrG5tUtOv0LVlcdRvqwO+ZtRUS/mtOEV5urApEirCGbfT7NHiarppFhdVpOg==}
     peerDependencies:
       '@asteasolutions/zod-to-openapi': ^8.0.0
       zod: ^4.0.0
@@ -8873,14 +8873,14 @@ snapshots:
       - eslint-plugin-import
       - supports-color
 
-  '@polygonlabs/express@3.0.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@polygonlabs/logger@2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3))(@polygonlabs/openapi-registry@2.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6))(@polygonlabs/verror@1.0.4)(express@5.2.1)(zod@4.3.6)':
+  '@polygonlabs/express@3.0.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(@polygonlabs/logger@2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3))(@polygonlabs/openapi-registry@2.1.1(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6))(@polygonlabs/verror@1.0.4)(express@5.2.1)(zod@4.3.6)':
     dependencies:
       '@polygonlabs/logger': 2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3)
       '@polygonlabs/verror': 1.0.4
       express: 5.2.1
     optionalDependencies:
       '@asteasolutions/zod-to-openapi': 8.4.2(zod@4.3.6)
-      '@polygonlabs/openapi-registry': 2.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
+      '@polygonlabs/openapi-registry': 2.1.1(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)
       zod: 4.3.6
 
   '@polygonlabs/logger@2.1.0(@polygonlabs/verror@1.0.4)(@sentry/node@10.46.0)(pino-pretty@13.1.3)':
@@ -8891,7 +8891,7 @@ snapshots:
       '@sentry/node': 10.46.0
       pino-pretty: 13.1.3
 
-  '@polygonlabs/openapi-registry@2.1.0(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)':
+  '@polygonlabs/openapi-registry@2.1.1(@asteasolutions/zod-to-openapi@8.4.2(zod@4.3.6))(zod@4.3.6)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 8.4.2(zod@4.3.6)
       zod: 4.3.6
