@@ -8,6 +8,17 @@ export type HealthCheckResponse = {
     success: boolean;
 };
 
+/**
+ * Standard error response shape from `@polygonlabs/express`'s `createErrorHandler`. `info` is present when the underlying `HTTPError` carries structured info (e.g. validation failures, domain-specific context); absent for plain errors and most non-validation HTTPErrors.
+ */
+export type ErrorResponse = {
+    error: true;
+    message: string;
+    info?: {
+        [key: string]: unknown;
+    };
+};
+
 export type HelloResponse = {
     message: string;
 };
@@ -33,34 +44,39 @@ export type BlockMetadata = {
 };
 
 /**
- * Standard error response shape from `@polygonlabs/express`'s `createErrorHandler`. `info` is present when the underlying `HTTPError` carries structured info (e.g. validation failures, domain-specific context); absent for plain errors and most non-validation HTTPErrors.
+ * Narrowed `ErrorResponse` for 400s emitted by the registry-driven router when request validation fails. `info` is non-optional and carries the section-keyed `ValidationErrorInfo` shape.
  */
-export type ErrorResponse = {
+export type ValidationErrorResponse = {
     error: true;
     message: string;
-    info?: {
-        [key: string]: unknown;
-    };
+    info: ValidationErrorInfo;
 };
 
-export type NotFound = {
-    error: true;
-    message: string;
+/**
+ * Section-keyed map of request validation failures. Only sections that failed appear; each value is the `z.treeifyError` tree for that section. Clients can wire e.g. `info.body.properties.label.errors[0]` directly into field-level UI feedback rather than walking a flat issue list.
+ */
+export type ValidationErrorInfo = {
+    params?: ZodErrorTree;
+    query?: ZodErrorTree;
+    body?: ZodErrorTree;
+    headers?: ZodErrorTree;
+};
+
+/**
+ * Recursive Zod validation error tree (the output of `z.treeifyError`). `errors` carries the messages at this node; `properties` keys nested object errors by field name; `items` indexes nested array errors.
+ */
+export type ZodErrorTree = {
+    errors: Array<string>;
+    properties?: {
+        [key: string]: ZodErrorTree;
+    };
+    items?: Array<ZodErrorTree>;
 };
 
 export type Message = {
     id: string;
     text: string;
     createdAt: string;
-};
-
-export type ValidationError = {
-    error: true;
-    message: string;
-    issues?: Array<{
-        path: Array<string | number>;
-        message: string;
-    }>;
 };
 
 export type CreateMessageRequest = {
@@ -79,6 +95,15 @@ export type GetHealthCheckData = {
     url: '/health-check';
 };
 
+export type GetHealthCheckErrors = {
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
+};
+
+export type GetHealthCheckError = GetHealthCheckErrors[keyof GetHealthCheckErrors];
+
 export type GetHealthCheckResponses = {
     /**
      * Service is alive
@@ -95,6 +120,15 @@ export type GetHelloData = {
     url: '/api/hello';
 };
 
+export type GetHelloErrors = {
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
+};
+
+export type GetHelloError = GetHelloErrors[keyof GetHelloErrors];
+
 export type GetHelloResponses = {
     /**
      * Greeting response
@@ -110,6 +144,15 @@ export type GetBlockNumberData = {
     query?: never;
     url: '/api/block-number';
 };
+
+export type GetBlockNumberErrors = {
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
+};
+
+export type GetBlockNumberError = GetBlockNumberErrors[keyof GetBlockNumberErrors];
 
 export type GetBlockNumberResponses = {
     /**
@@ -131,13 +174,21 @@ export type GetBlockMetadataData = {
 
 export type GetBlockMetadataErrors = {
     /**
-     * Missing or invalid x-api-key header
+     * Request failed schema validation.
+     */
+    400: ValidationErrorResponse;
+    /**
+     * Missing or invalid credentials.
      */
     401: ErrorResponse;
     /**
      * Block not found
      */
-    404: NotFound;
+    404: ErrorResponse;
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
 };
 
 export type GetBlockMetadataError = GetBlockMetadataErrors[keyof GetBlockMetadataErrors];
@@ -161,6 +212,19 @@ export type ListMessagesData = {
     url: '/api/messages';
 };
 
+export type ListMessagesErrors = {
+    /**
+     * Request failed schema validation.
+     */
+    400: ValidationErrorResponse;
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
+};
+
+export type ListMessagesError = ListMessagesErrors[keyof ListMessagesErrors];
+
 export type ListMessagesResponses = {
     /**
      * Page of messages
@@ -179,9 +243,13 @@ export type CreateMessageData = {
 
 export type CreateMessageErrors = {
     /**
-     * Invalid request
+     * Request failed schema validation.
      */
-    400: ValidationError;
+    400: ValidationErrorResponse;
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
 };
 
 export type CreateMessageError = CreateMessageErrors[keyof CreateMessageErrors];
@@ -206,9 +274,17 @@ export type GetMessageData = {
 
 export type GetMessageErrors = {
     /**
+     * Request failed schema validation.
+     */
+    400: ValidationErrorResponse;
+    /**
      * Not found
      */
-    404: NotFound;
+    404: ErrorResponse;
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
 };
 
 export type GetMessageError = GetMessageErrors[keyof GetMessageErrors];
