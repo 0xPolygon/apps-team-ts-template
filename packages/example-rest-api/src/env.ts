@@ -87,7 +87,30 @@ function buildEnv() {
       // provision a value via the secret manager.
       MANAGEMENT_API_KEY: z.string().min(1),
       PRETTY_LOGS: BooleanOrBooleanStringSchema.optional(),
-      SENTRY_DSN: z.url().optional()
+      SENTRY_DSN: z.url().optional(),
+
+      // ── Cache-aside example: Redis + Firestore ──────────────────────────
+      // The widget read path (GET /api/widgets/{id}) reads from Firestore
+      // through a Redis cache. The integration suite stands both up locally;
+      // see vitest.globalSetup.ts and tests/integration/.
+      //
+      // `host:port`, not a `redis://` URI — matches the secret-store
+      // convention used across our services. Parsed in src/redis.ts.
+      REDIS_URL: z.string().min(1),
+      // Production Redis is often a single-node *cluster*; standalone
+      // docker-compose Redis is not. Defaults to standalone here because the
+      // example only needs the cache to function, not the prod topology.
+      REDIS_CLUSTER: BooleanOrBooleanStringSchema.optional(),
+      // The @google-cloud/firestore SDK auto-detects this from the
+      // environment and routes every call to the local emulator when set —
+      // we never read it directly. Present in the schema so the contract is
+      // documented and validated. Absent in production (real Firestore via
+      // Application Default Credentials).
+      FIRESTORE_EMULATOR_HOST: z.string().optional(),
+      // A `demo-*` project id keeps the emulator credential-free. In
+      // production this is the real GCP project. The default lets a fresh
+      // clone run the integration suite against the emulator with no setup.
+      GOOGLE_CLOUD_PROJECT_ID: z.string().min(1).default('demo-example-rest-api')
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true

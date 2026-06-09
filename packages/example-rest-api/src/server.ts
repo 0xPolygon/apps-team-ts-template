@@ -15,13 +15,18 @@ import { createRegistryRouter } from '@polygonlabs/express/registry';
 import type { Logger } from './logger.ts';
 
 import { getEnv } from './env.ts';
+import { createFirestore } from './firestore.ts';
 import { buildAuthHandlers } from './handlers/auth.ts';
 import { buildMessageHandlers } from './handlers/messages.ts';
 import { buildNetworkHandlers } from './handlers/network.ts';
 import { buildStaticHandlers } from './handlers/static.ts';
+import { buildWidgetHandlers } from './handlers/widgets.ts';
+import { createRedisClient } from './redis.ts';
 import { openApiRouter } from './routes/openapi.ts';
 import { MessageStore } from './services/MessageStore.ts';
 import { NetworkService } from './services/NetworkService.ts';
+import { WidgetService } from './services/WidgetService.ts';
+import { WidgetStore } from './services/WidgetStore.ts';
 
 export type ServerEventMap = {
   /** Emitted when the cron is registered, after listen() is called. */
@@ -59,6 +64,13 @@ export type BlockData = {
 export type ServerDependencies = {
   getBlockNumber?: () => Promise<number>;
   getBlock?: (blockNumber: bigint) => Promise<BlockData | null>;
+  /**
+   * Override the cache-aside widget service. Production wiring builds the
+   * real one lazily from env (Firestore + Redis) on first widget request —
+   * the hermetic unit suite never hits that route, so it never connects.
+   * Tests that want a stub can inject one here.
+   */
+  widgetService?: WidgetService;
 };
 
 /**
@@ -120,6 +132,26 @@ export function createServer(logger: Logger, deps: ServerDependencies = {}): App
 
   const messageStore = new MessageStore();
 
+  // Cache-aside widget service, built lazily on first widget request — same
+  // pattern as the provider above. Constructing it opens a Redis connection,
+  // so deferring it keeps the hermetic unit suite (which never hits the
+  // widget route) from touching Redis/Firestore. The server owns the lazily
+  // built instance and closes it on shutdown; an injected one (tests) is the
+  // caller's to close.
+  let _widgetService: WidgetService | undefined;
+  const getWidgetService = (): WidgetService => {
+    if (deps.widgetService) return deps.widgetService;
+    return (_widgetService ??= new WidgetService({
+      store: new WidgetStore(createFirestore()),
+      cache: createRedisClient({
+        redisUrl: env.REDIS_URL,
+        logger,
+        cluster: env.REDIS_CLUSTER ?? false
+      }),
+      logger
+    }));
+  };
+
   const app = express();
 
   app.use(cors());
@@ -158,6 +190,7 @@ export function createServer(logger: Logger, deps: ServerDependencies = {}): App
       .implement(buildStaticHandlers())
       .implement(buildNetworkHandlers({ blockNumberService, getBlock }))
       .implement(buildMessageHandlers(messageStore))
+      .implement(buildWidgetHandlers({ getWidgetService }))
       .toExpress();
 
     // Mount the registry-driven routes flat at the app root. Operation paths
@@ -182,6 +215,11 @@ export function createServer(logger: Logger, deps: ServerDependencies = {}): App
     const server = _listen(...args);
     server.on('close', () => {
       blockNumberService.stop();
+      // Close the lazily built widget service's Redis connection. Only the
+      // server-owned instance is closed here; an injected one belongs to the
+      // caller. Fire-and-forget — the 'close' event handler can't await, and
+      // a graceful ioredis quit() resolves on its own.
+      void _widgetService?.close();
       serverEvents.removeAllListeners();
     });
     return server;

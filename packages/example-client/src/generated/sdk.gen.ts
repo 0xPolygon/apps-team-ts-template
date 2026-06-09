@@ -2,8 +2,8 @@
 
 import { client } from './client.gen.js';
 import type { Client, Options as Options2, TDataShape } from './client/index.js';
-import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberErrors, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckErrors, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloErrors, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type ListMessagesErrors, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
-import type { CreateMessageData, GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, ListMessagesData } from './types.gen.js';
+import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberErrors, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckErrors, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloErrors, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type GetWidgetErrors, type GetWidgetResponses, getWidgetTransformer, type ListMessagesErrors, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
+import type { CreateMessageData, GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, GetWidgetData, ListMessagesData } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -88,5 +88,16 @@ export const createMessage = <ThrowOnError extends boolean = false>(options?: Op
 export const getMessage = <ThrowOnError extends boolean = false>(options: Options<GetMessageData, ThrowOnError>) => (options.client ?? client).get<GetMessageResponses, GetMessageErrors, ThrowOnError>({
     responseTransformer: getMessageTransformer,
     url: '/api/messages/{id}',
+    ...options
+});
+
+/**
+ * Get a widget by id
+ *
+ * Reads a widget from Firestore through a Redis cache (cache-aside). First read populates the cache; subsequent reads are served from it.
+ */
+export const getWidget = <ThrowOnError extends boolean = false>(options: Options<GetWidgetData, ThrowOnError>) => (options.client ?? client).get<GetWidgetResponses, GetWidgetErrors, ThrowOnError>({
+    responseTransformer: getWidgetTransformer,
+    url: '/api/widgets/{id}',
     ...options
 });

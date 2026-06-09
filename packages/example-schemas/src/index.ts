@@ -14,7 +14,8 @@ export {
   HelloResponse,
   Message,
   MessageList,
-  RecentMessagesQuery
+  RecentMessagesQuery,
+  Widget
 } from './schemas.ts';
 
 // Re-export the canonical error response schemas from

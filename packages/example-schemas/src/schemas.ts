@@ -90,6 +90,20 @@ export const CreateMessageRequest = z
   })
   .openapi('CreateMessageRequest');
 
+// Widget — the cache-aside example's domain entity. Deliberately a plain
+// `{ id, name }` with no codec: the managed-local-resource example
+// (Firestore source-of-truth + Redis cache, see the service package's
+// tests/integration suite) teaches resource lifecycle and test isolation,
+// not codec round-tripping — that lesson already lives on Message/Block.
+// Keeping the shape trivial keeps the cache-aside read path the only thing
+// under test.
+export const Widget = z
+  .object({
+    id: z.uuid(),
+    name: z.string().min(1).max(120)
+  })
+  .openapi('Widget');
+
 // Error response shapes are not hand-rolled here. The registry-driven
 // router in `@polygonlabs/express` auto-injects the canonical
 // `ErrorResponse` (for 401/5xx) and `ValidationErrorResponse` (for 400)

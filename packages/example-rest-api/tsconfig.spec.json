@@ -8,7 +8,13 @@
     "rewriteRelativeImportExtensions": false,
     "allowImportingTsExtensions": true
   },
-  "include": ["tests/**/*.ts", "vitest.config.ts", "vitest.setup.ts"],
+  "include": [
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "vitest.integration.config.ts",
+    "vitest.globalSetup.ts"
+  ],
   "references": [
     { "path": "./tsconfig.lib.json" },
     { "path": "../example-client/tsconfig.lib.json" }
