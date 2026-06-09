@@ -9,6 +9,8 @@
 import type { buildRegistry } from '@polygonlabs/example-schemas';
 import type { HandlerMapFor } from '@polygonlabs/express/registry';
 
+import { NotFound } from '@polygonlabs/verror';
+
 import type { MessageStore } from '../services/MessageStore.ts';
 
 export const buildMessageHandlers = (store: MessageStore) =>
@@ -26,8 +28,10 @@ export const buildMessageHandlers = (store: MessageStore) =>
     getMessage: (req, res) => {
       const message = store.get(req.params.id);
       if (message === null) {
-        res.status(404).json({ error: true, message: `Message ${req.params.id} not found` });
-        return;
+        // Throw NotFound rather than writing res.status(404) by hand: the
+        // global createErrorHandler maps the HTTPError's statusCode and emits
+        // the canonical ErrorResponse body, so spec, runtime, and client agree.
+        throw new NotFound(`Message ${req.params.id} not found`);
       }
       res.json(message);
     }

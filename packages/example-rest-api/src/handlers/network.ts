@@ -15,6 +15,7 @@ import type { buildRegistry } from '@polygonlabs/example-schemas';
 import type { HandlerMapFor } from '@polygonlabs/express/registry';
 
 import { getLogger } from '@polygonlabs/express';
+import { NotFound } from '@polygonlabs/verror';
 
 import type { BlockData } from '../server.ts';
 import type { NetworkService } from '../services/NetworkService.ts';
@@ -40,11 +41,9 @@ export const buildNetworkHandlers = (deps: {
       // handler was called.
       const block = await deps.getBlock(req.params.blockNumber);
       if (block === null) {
-        res.status(404).json({
-          error: true,
-          message: `Block ${req.params.blockNumber.toString()} not found`
-        });
-        return;
+        // Throw NotFound rather than res.status(404) by hand — createErrorHandler
+        // maps the HTTPError's statusCode and emits the canonical ErrorResponse.
+        throw new NotFound(`Block ${req.params.blockNumber.toString()} not found`);
       }
       res.json(block);
     }
