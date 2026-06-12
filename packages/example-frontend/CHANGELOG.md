@@ -1,5 +1,12 @@
 # example-frontend
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [b598714]
+  - @polygonlabs/example-client@0.5.0
+
 ## 1.0.5
 
 ### Patch Changes
