@@ -230,19 +230,21 @@ service `dev` script all read `.ts` source directly without producing a
 For local iteration, the build step shown above before the generate
 covers it.
 
-**Never run the generate with
-`NODE_OPTIONS='--conditions=@polygonlabs/source'` as a build-free
-shortcut.** It appears to work, but produces *different* generated
-output: with the schemas resolved from source, the plugin's codec
-detection fails (the schemas' Zod values and the plugin's own
-`zod`/`@polygonlabs/zod-codecs` imports no longer share module
-identity), and every codec input-transformer (`*Input` types,
-`*InputTransformer` functions, `z.encode` wrappers) is silently
-dropped from the emitted client. Verified empirically against this
-repo: source-condition output and dist-based output diverge by
-hundreds of lines while both exit 0. Codegen is always dist-based;
-the `codegen-drift-check` gate (below) fails red on output generated
-the wrong way.
+**Source-condition generate needs the plugin at ≥2.0.0 — this repo
+has not migrated yet.** On the installed 1.3.x, running the generate
+with `NODE_OPTIONS='--conditions=@polygonlabs/source'` silently emits
+*different* output: 1.3.x resolved anonymous input-slot schemas by
+module-instance identity, the source condition splits the schemas
+module into two evaluations (jiti loads the config's copy, the plugin
+natively imports another), and every codec input-transformer is
+dropped while codegen exits 0.
+`@polygonlabs/zod-to-openapi-heyapi@2.0.0` removes the identity path —
+input-slot names come from `.openapi('Name')` registration metadata
+(mode-independent), and unregistered codec-bearing slots fail codegen
+loudly. Until this repo bumps to `^2.0.0` and registers its two
+anonymous input schemas (see the plugin's `MIGRATION.md`), codegen
+stays dist-based; the `codegen-drift-check` gate (below) fails red on
+output generated the wrong way regardless.
 
 Both codegen outputs are committed and drift-gated: `example-schemas`'
 `codegen-drift-check` rebuilds the package (regenerating `openapi.json`
