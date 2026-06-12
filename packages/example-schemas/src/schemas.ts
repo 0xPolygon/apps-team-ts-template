@@ -116,13 +116,13 @@ export const Widget = z
 
 // ── Input schemas (request side) ──────────────────────────────────────────────
 //
-// Plain exports — no `.openapi('Name')` chain needed. The
+// Codec-bearing input schemas must be registered with `.openapi('Name')`
+// and exported under that exact name. Since 2.0.0 the
 // @polygonlabs/zod-to-openapi-heyapi plugin resolves input slot names
-// by identity-matching the route's `request.{params, query, body}`
-// schema against the named exports of `schemasFrom` at codegen time.
-// Use the same instance in the route as you export here (i.e. import
-// and pass it directly), and the plugin emits the matching import +
-// input transformer.
+// from this registration metadata (never by module-instance identity,
+// which broke under split module evaluation) and fails codegen loudly
+// for a codec-bearing slot that isn't registered. Codec-free inline
+// request schemas may stay anonymous.
 
 // Codec-on-path stress test: `:blockNumber` is `Int64Codec`. The wire
 // shape is a digit string; the runtime shape is `bigint`. With the
@@ -130,15 +130,19 @@ export const Widget = z
 // URL gets the digit string. Number-flavoured codecs round-trip even
 // without the transformer (see INVESTIGATION-codecs.md), so this route
 // is the ergonomic-typing test case rather than the runtime-fix case.
-export const BlockNumberPathParams = z.object({
-  blockNumber: Int64Codec
-});
+export const BlockNumberPathParams = z
+  .object({
+    blockNumber: Int64Codec
+  })
+  .openapi('BlockNumberPathParams');
 
 // Codec on a query parameter — the case the input transformer is built for.
 // `IsoDateCodec.encode = (d) => d.toISOString()` does not equal `String(d)`,
 // so without the transformer a Date in `since` would land in the URL as the
 // locale string and the server's parser would reject it.
-export const RecentMessagesQuery = z.object({
-  cursor: z.string().optional(),
-  since: IsoDateCodec.optional()
-});
+export const RecentMessagesQuery = z
+  .object({
+    cursor: z.string().optional(),
+    since: IsoDateCodec.optional()
+  })
+  .openapi('RecentMessagesQuery');

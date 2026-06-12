@@ -220,31 +220,30 @@ service `dev` script all read `.ts` source directly without producing a
   **not** active for that dynamic import unless the openapi-ts process
   was started with `--conditions=@polygonlabs/source` (or
   `NODE_OPTIONS='--conditions=@polygonlabs/source'`).
-- So in practice, `pnpm --filter @polygonlabs/example-client run generate`
+- So a plain `pnpm --filter @polygonlabs/example-client run generate`
   needs a built `dist/` for the schemas package — Node falls through to
   the package's `import` export condition, which resolves to
   `./dist/index.js`. This is the case CI handles automatically (root
   `pnpm -r --if-present run build` runs in topological order, schemas
   before client).
+- Build-free codegen works by activating the condition for the whole
+  process — no schemas `dist/` needed at all:
 
-For local iteration, the build step shown above before the generate
-covers it.
+  ```bash
+  NODE_OPTIONS='--conditions=@polygonlabs/source' \
+    pnpm --filter @polygonlabs/example-client run generate
+  ```
 
-**Source-condition generate needs the plugin at ≥2.0.0 — this repo
-has not migrated yet.** On the installed 1.3.x, running the generate
-with `NODE_OPTIONS='--conditions=@polygonlabs/source'` silently emits
-*different* output: 1.3.x resolved anonymous input-slot schemas by
-module-instance identity, the source condition splits the schemas
-module into two evaluations (jiti loads the config's copy, the plugin
-natively imports another), and every codec input-transformer is
-dropped while codegen exits 0.
-`@polygonlabs/zod-to-openapi-heyapi@2.0.0` removes the identity path —
-input-slot names come from `.openapi('Name')` registration metadata
-(mode-independent), and unregistered codec-bearing slots fail codegen
-loudly. Until this repo bumps to `^2.0.0` and registers its two
-anonymous input schemas (see the plugin's `MIGRATION.md`), codegen
-stays dist-based; the `codegen-drift-check` gate (below) fails red on
-output generated the wrong way regardless.
+Both modes produce byte-identical output (verified against plugin
+2.0.0). This requires `@polygonlabs/zod-to-openapi-heyapi` ≥2.0.0 and
+codec-bearing input schemas registered with `.openapi('Name')` — both
+in place in this repo. On 1.3.x the source-condition run silently
+emitted a corrupt client (input-slot names were resolved by
+module-instance identity, which the condition's split module
+evaluation broke); 2.0.0 resolves names from registration metadata and
+fails loudly on any unregistered codec-bearing slot instead. See the
+plugin's `MIGRATION.md`. The `codegen-drift-check` gate (below)
+backstops output generated with the wrong toolchain either way.
 
 Both codegen outputs are committed and drift-gated: `example-schemas`'
 `codegen-drift-check` rebuilds the package (regenerating `openapi.json`
