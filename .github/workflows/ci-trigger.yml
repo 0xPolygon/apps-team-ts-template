@@ -26,3 +26,12 @@ jobs:
         # these instead of managing Docker itself — the canonical CI handoff.
         run: .github/scripts/start-integration-resources.sh localhost
       - uses: 0xPolygon/pipelines/.github/actions/ci@main
+
+  drift-check:
+    # Discrete PR-check status separate from lint/typecheck/test so a drift
+    # failure is identifiable at a glance. Runs every package's
+    # codegen-drift-check script in topological order — example-schemas
+    # rebuilds (regenerating openapi.json and its dist/) before
+    # example-client regenerates, so the client codegen resolves the schemas
+    # package's built dist/ exactly as a fresh checkout requires.
+    uses: 0xPolygon/pipelines/.github/workflows/apps-codegen-drift-check.yml@main

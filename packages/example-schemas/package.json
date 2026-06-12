@@ -21,6 +21,7 @@
   "scripts": {
     "build": "pnpm run typecheck && tsc -b tsconfig.lib.json && node --conditions=@polygonlabs/source scripts/generate-spec.ts",
     "build:clean": "pnpm run typecheck && rm -rf dist out-tsc *.tsbuildinfo && tsc -b tsconfig.lib.json && node --conditions=@polygonlabs/source scripts/generate-spec.ts",
+    "codegen-drift-check": "pnpm run build && git diff --exit-code -- openapi.json",
     "typecheck": "tsc -b",
     "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },

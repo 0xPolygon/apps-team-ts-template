@@ -228,20 +228,31 @@ service `dev` script all read `.ts` source directly without producing a
   before client).
 
 For local iteration, the build step shown above before the generate
-covers it. If you want the codegen to read source directly without a
-schemas rebuild, run:
+covers it.
 
-```bash
-NODE_OPTIONS='--conditions=@polygonlabs/source' \
-  pnpm --filter @polygonlabs/example-client run generate
-```
+**Never run the generate with
+`NODE_OPTIONS='--conditions=@polygonlabs/source'` as a build-free
+shortcut.** It appears to work, but produces *different* generated
+output: with the schemas resolved from source, the plugin's codec
+detection fails (the schemas' Zod values and the plugin's own
+`zod`/`@polygonlabs/zod-codecs` imports no longer share module
+identity), and every codec input-transformer (`*Input` types,
+`*InputTransformer` functions, `z.encode` wrappers) is silently
+dropped from the emitted client. Verified empirically against this
+repo: source-condition output and dist-based output diverge by
+hundreds of lines while both exit 0. Codegen is always dist-based;
+the `codegen-drift-check` gate (below) fails red on output generated
+the wrong way.
 
-This isn't a plugin-side concern — the plugin's error message hints at
-the workaround when the dynamic import fails — but it's specific enough
-to this repo's build-free story that it's worth documenting here.
-
-`packages/example-client/src/generated/` is committed and gated by the
-package's `codegen-drift-check` script — drift surfaces in PR diffs.
+Both codegen outputs are committed and drift-gated: `example-schemas`'
+`codegen-drift-check` rebuilds the package (regenerating `openapi.json`
+*and* its `dist/`) and diffs the spec; `example-client`'s regenerates
+the client and diffs `src/generated/`. The CI `drift-check` job (see
+`.github/workflows/ci-trigger.yml`) runs them workspace-wide in
+topological order, so the schemas gate's build is what makes the
+client gate's dist-based generate work on a fresh checkout. See
+`apps-team-ops/docs/best-practices/codegen-management.md` for the
+general pattern.
 
 The repo's `sonar-project.properties` excludes `**/src/generated/**`
 from analysis and coverage so the snapshot doesn't dominate Sonar
