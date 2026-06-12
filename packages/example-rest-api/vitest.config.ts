@@ -15,6 +15,10 @@ export default defineConfig({
   },
   test: {
     include: ['tests/**/*.test.ts'],
+    // Integration is opt-in via `pnpm run test:integration` — never picked up
+    // by the hermetic unit run, so it can't accidentally boot Docker or hit a
+    // deployment.
+    exclude: ['tests/integration/**', 'node_modules/**'],
     setupFiles: ['./vitest.setup.ts'],
     ...(process.env.CI ? { reporters: ['verbose'] as const } : {})
   }

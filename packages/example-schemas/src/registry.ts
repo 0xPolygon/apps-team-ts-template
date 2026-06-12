@@ -21,6 +21,7 @@ import { TypedRegistry } from '@polygonlabs/openapi-registry';
 import { addBlockRoutes } from './routes/blocks.ts';
 import { addCoreRoutes } from './routes/core.ts';
 import { addMessageRoutes } from './routes/messages.ts';
+import { addWidgetRoutes } from './routes/widgets.ts';
 
 export const buildRegistry = () =>
   new TypedRegistry()
@@ -36,4 +37,5 @@ export const buildRegistry = () =>
     })
     .with(addCoreRoutes)
     .with(addBlockRoutes)
-    .with(addMessageRoutes);
+    .with(addMessageRoutes)
+    .with(addWidgetRoutes);

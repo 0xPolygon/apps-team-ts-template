@@ -12,4 +12,17 @@ jobs:
     name: CI - lint / typecheck / test
     runs-on: ubuntu-latest
     steps:
+      # Check out first so the integration resources' docker-compose.yml and
+      # start script are present before the CI composite (which does its own
+      # checkout) runs `pnpm test`.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Start integration test infrastructure
+        # example-rest-api's integration suite needs Redis + a Firestore
+        # emulator. The Firestore emulator can't be a GitHub Actions `services:`
+        # container (service containers can't override an image's command, and
+        # the emulator image needs `gcloud beta emulators firestore start`), so
+        # both come up via docker-compose here. The script exports REDIS_URL /
+        # FIRESTORE_EMULATOR_HOST to $GITHUB_ENV so vitest.globalSetup defers to
+        # these instead of managing Docker itself — the canonical CI handoff.
+        run: .github/scripts/start-integration-resources.sh localhost
       - uses: 0xPolygon/pipelines/.github/actions/ci@main

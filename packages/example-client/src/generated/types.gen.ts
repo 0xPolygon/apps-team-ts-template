@@ -88,6 +88,11 @@ export type MessageList = {
     nextCursor: string | null;
 };
 
+export type Widget = {
+    id: string;
+    name: string;
+};
+
 export type GetHealthCheckData = {
     body?: never;
     path?: never;
@@ -297,3 +302,38 @@ export type GetMessageResponses = {
 };
 
 export type GetMessageResponse = GetMessageResponses[keyof GetMessageResponses];
+
+export type GetWidgetData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/widgets/{id}';
+};
+
+export type GetWidgetErrors = {
+    /**
+     * Request failed schema validation.
+     */
+    400: ValidationErrorResponse;
+    /**
+     * Not found
+     */
+    404: ErrorResponse;
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
+};
+
+export type GetWidgetError = GetWidgetErrors[keyof GetWidgetErrors];
+
+export type GetWidgetResponses = {
+    /**
+     * Widget
+     */
+    200: Widget;
+};
+
+export type GetWidgetResponse = GetWidgetResponses[keyof GetWidgetResponses];

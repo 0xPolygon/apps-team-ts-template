@@ -3,9 +3,9 @@
 import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import type { CreateMessageError, CreateMessageResponse, GetBlockNumberError, GetBlockNumberResponse, GetHealthCheckError, GetHealthCheckResponse, GetHelloError, GetHelloResponse, GetMessageError, GetMessageResponse } from '../registry-validator.gen.js';
-import { createMessage, getBlockNumber, getHealthCheck, getHello, getMessage, type Options } from '../sdk.gen.js';
-import type { CreateMessageData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData } from '../types.gen.js';
+import type { CreateMessageError, CreateMessageResponse, GetBlockNumberError, GetBlockNumberResponse, GetHealthCheckError, GetHealthCheckResponse, GetHelloError, GetHelloResponse, GetMessageError, GetMessageResponse, GetWidgetError, GetWidgetResponse } from '../registry-validator.gen.js';
+import { createMessage, getBlockNumber, getHealthCheck, getHello, getMessage, getWidget, type Options } from '../sdk.gen.js';
+import type { CreateMessageData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, GetWidgetData } from '../types.gen.js';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -129,4 +129,24 @@ export const getMessageOptions = (options: Options<GetMessageData>) => queryOpti
         return data;
     },
     queryKey: getMessageQueryKey(options)
+});
+
+export const getWidgetQueryKey = (options: Options<GetWidgetData>) => createQueryKey('getWidget', options);
+
+/**
+ * Get a widget by id
+ *
+ * Reads a widget from Firestore through a Redis cache (cache-aside). First read populates the cache; subsequent reads are served from it.
+ */
+export const getWidgetOptions = (options: Options<GetWidgetData>) => queryOptions<GetWidgetResponse, GetWidgetError, GetWidgetResponse, ReturnType<typeof getWidgetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getWidget({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getWidgetQueryKey(options)
 });

@@ -1,0 +1,42 @@
+# Local test infrastructure for the in-process integration suite
+# (`pnpm run test:integration`). vitest.globalSetup.ts brings these up with
+# `docker compose up -d --wait`, discovers the published host ports, points the
+# app at them (REDIS_URL + FIRESTORE_EMULATOR_HOST), and tears them down after.
+#
+# Both services publish on EPHEMERAL host ports (note `- '6379'`, not
+# `- '6379:6379'`) so concurrent suites, multiple branches, or a developer's
+# own local Redis / emulator never collide on a fixed port. globalSetup asks
+# `docker compose port <service> <containerPort>` for the actual mapping —
+# auto-discovery, the same idea as an emulator advertising its host.
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+
+  firestore-emulator:
+    # The Firestore emulator ships in the cloud-cli `emulators` image. First
+    # run pulls it (~1.5 GB). The `demo-*` project id is credential-free: the
+    # @google-cloud/firestore SDK auto-detects FIRESTORE_EMULATOR_HOST and
+    # talks to this with no GCP credentials.
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: >-
+      gcloud beta emulators firestore start
+      --host-port=0.0.0.0:8080
+      --project=demo-example-rest-api
+    ports:
+      - '8080'
+    healthcheck:
+      # The emulator image has no curl/grpc client; a bash TCP probe against
+      # the listening port is enough to know it's up. Copied from pos-airdrop.
+      test: ['CMD-SHELL', "bash -c 'echo > /dev/tcp/localhost/8080' 2>/dev/null || exit 1"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 5s
