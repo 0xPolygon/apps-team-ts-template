@@ -220,28 +220,40 @@ service `dev` script all read `.ts` source directly without producing a
   **not** active for that dynamic import unless the openapi-ts process
   was started with `--conditions=@polygonlabs/source` (or
   `NODE_OPTIONS='--conditions=@polygonlabs/source'`).
-- So in practice, `pnpm --filter @polygonlabs/example-client run generate`
+- So a plain `pnpm --filter @polygonlabs/example-client run generate`
   needs a built `dist/` for the schemas package — Node falls through to
   the package's `import` export condition, which resolves to
   `./dist/index.js`. This is the case CI handles automatically (root
   `pnpm -r --if-present run build` runs in topological order, schemas
   before client).
+- Build-free codegen works by activating the condition for the whole
+  process — no schemas `dist/` needed at all:
 
-For local iteration, the build step shown above before the generate
-covers it. If you want the codegen to read source directly without a
-schemas rebuild, run:
+  ```bash
+  NODE_OPTIONS='--conditions=@polygonlabs/source' \
+    pnpm --filter @polygonlabs/example-client run generate
+  ```
 
-```bash
-NODE_OPTIONS='--conditions=@polygonlabs/source' \
-  pnpm --filter @polygonlabs/example-client run generate
-```
+Both modes produce byte-identical output (verified against plugin
+2.0.0). This requires `@polygonlabs/zod-to-openapi-heyapi` ≥2.0.0 and
+codec-bearing input schemas registered with `.openapi('Name')` — both
+in place in this repo. On 1.3.x the source-condition run silently
+emitted a corrupt client (input-slot names were resolved by
+module-instance identity, which the condition's split module
+evaluation broke); 2.0.0 resolves names from registration metadata and
+fails loudly on any unregistered codec-bearing slot instead. See the
+plugin's `MIGRATION.md`. The `codegen-drift-check` gate (below)
+backstops output generated with the wrong toolchain either way.
 
-This isn't a plugin-side concern — the plugin's error message hints at
-the workaround when the dynamic import fails — but it's specific enough
-to this repo's build-free story that it's worth documenting here.
-
-`packages/example-client/src/generated/` is committed and gated by the
-package's `codegen-drift-check` script — drift surfaces in PR diffs.
+Both codegen outputs are committed and drift-gated: `example-schemas`'
+`codegen-drift-check` rebuilds the package (regenerating `openapi.json`
+*and* its `dist/`) and diffs the spec; `example-client`'s regenerates
+the client and diffs `src/generated/`. The CI `drift-check` job (see
+`.github/workflows/ci-trigger.yml`) runs them workspace-wide in
+topological order, so the schemas gate's build is what makes the
+client gate's dist-based generate work on a fresh checkout. See
+`apps-team-ops/docs/best-practices/codegen-management.md` for the
+general pattern.
 
 The repo's `sonar-project.properties` excludes `**/src/generated/**`
 from analysis and coverage so the snapshot doesn't dominate Sonar
