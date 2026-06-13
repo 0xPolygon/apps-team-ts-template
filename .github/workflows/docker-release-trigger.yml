@@ -3,12 +3,17 @@ name: Docker release
 on:
   push:
     tags:
+      # Match every changeset release tag — scoped tags contain a `/`, which
+      # GitHub's `*` glob does not cross, hence the second pattern. The
+      # docker-test composite resolves the tagged package and skips anything
+      # without a Dockerfile, so library and frontend tags no-op by design.
+      # Never maintain a per-package tag list here.
       - '*@[0-9]*'
       - '*/*@[0-9]*'
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Full changeset tag to build (e.g. example-rest-api@1.2.3)'
+        description: 'Full changeset tag to build (e.g. @polygonlabs/example-rest-api@1.2.3)'
         required: true
         type: string
 

@@ -76,11 +76,11 @@ This enables fully build-free local development:
 
 - **Typecheck** (`pnpm run typecheck`) — resolves `.ts` source via `customConditions: ["@polygonlabs/source"]`
   in `tsconfig.base.json`. No `dist/` needed.
-- **Service dev** (`pnpm --filter example-rest-api run dev`) — passes `--conditions @polygonlabs/source` to
+- **Service dev** (`pnpm --filter @polygonlabs/example-rest-api run dev`) — passes `--conditions @polygonlabs/source` to
   Node. Workspace symlinks point outside `node_modules/` so Node's type stripping applies.
   Changes to library source are visible to the running service immediately — no watchers or
   rebuilds.
-- **Frontend dev** (`pnpm --filter example-frontend run dev`) — Vite is configured with
+- **Frontend dev** (`pnpm --filter @polygonlabs/example-frontend run dev`) — Vite is configured with
   `resolve.conditions: ["@polygonlabs/source"]`, picks up `.ts` source directly.
 - **Tests** — Vitest is configured with `ssr.resolve.conditions: ["@polygonlabs/source"]` (service) and
   `resolve.conditions: ["@polygonlabs/source"]` (frontend).

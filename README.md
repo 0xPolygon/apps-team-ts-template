@@ -48,10 +48,10 @@ pnpm install
 cp packages/example-rest-api/.env.example packages/example-rest-api/.env
 
 # Start the service (no build needed)
-pnpm --filter example-rest-api run dev
+pnpm --filter @polygonlabs/example-rest-api run dev
 
 # Start the frontend (no build needed)
-pnpm --filter example-frontend run dev
+pnpm --filter @polygonlabs/example-frontend run dev
 ```
 
 ## Scripts
@@ -177,7 +177,7 @@ Docker is the only context that requires a build, because `pnpm deploy` creates 
 
 ## After Cloning This Template
 
-1. Rename packages: `example-schemas` → `<service>-schemas`, `example-client` → `<service>-client`, `example-rest-api` → `<service>`, `example-frontend` → your frontend name (or delete if not needed)
+1. Rename packages: `example-schemas` → `<service>-schemas`, `example-client` → `<service>-client`, `example-rest-api` → `<service>`, `example-frontend` → your frontend name (or delete if not needed). Keep every package — deployables included — under the `@polygonlabs/` scope: the docker-test composite strips the scope when deriving the image name, and `pnpm --filter` matches a scoped package by its unscoped name. The docker-release trigger matches all changeset tags generically and the shared tooling skips packages without a Dockerfile — there is no per-package tag list to maintain
 2. Update `package.json` `name` fields and the root workspace `name`
 3. Replace example Zod schemas and routes with your actual API surface
 4. Update `src/env.ts` in each package for your environment variables
