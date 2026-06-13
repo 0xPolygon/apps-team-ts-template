@@ -41,6 +41,7 @@
     "lint-staged": "^16.2.7",
     "markdownlint-cli2": "^0.21.0",
     "pino-pretty": ">=13.0.0",
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "prettier-plugin-astro": "^0.14.1"
   }
 }
