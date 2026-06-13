@@ -27,6 +27,8 @@ RUN pnpm run build
 
 # Create a self-contained production bundle for this service.
 # pnpm resolves workspace:* deps and copies their declared 'files' (dist/).
+# Unscoped on purpose: pnpm --filter matches the scoped package
+# (@polygonlabs/example-rest-api) by its unscoped name.
 ARG SERVICE_NAME=example-rest-api
 RUN pnpm --filter "${SERVICE_NAME}" deploy --prod --legacy /deploy
 
