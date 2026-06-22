@@ -183,4 +183,5 @@ Docker is the only context that requires a build, because `pnpm deploy` creates 
 4. Update `src/env.ts` in each package for your environment variables
 5. Update `.env.example` files
 6. Update this `README.md` and `CLAUDE.md`
-7. Register the repo in `polygon-infrastructure` for OIDC if it will deploy via Docker release pipeline
+7. Update the `repo` in `.changeset/config.json`'s `changelog` entry to `0xPolygon/<your-repo>` so changelog PR and commit links point at your repository
+8. Register the repo in `polygon-infrastructure` for OIDC if it will deploy via Docker release pipeline
