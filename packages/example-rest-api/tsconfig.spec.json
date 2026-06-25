@@ -17,6 +17,7 @@
   ],
   "references": [
     { "path": "./tsconfig.lib.json" },
-    { "path": "../example-client/tsconfig.lib.json" }
+    { "path": "../example-client/tsconfig.lib.json" },
+    { "path": "../example-db/tsconfig.lib.json" }
   ]
 }

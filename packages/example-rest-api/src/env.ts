@@ -110,7 +110,13 @@ function buildEnv() {
       // A `demo-*` project id keeps the emulator credential-free. In
       // production this is the real GCP project. The default lets a fresh
       // clone run the integration suite against the emulator with no setup.
-      GOOGLE_CLOUD_PROJECT_ID: z.string().min(1).default('demo-example-rest-api')
+      GOOGLE_CLOUD_PROJECT_ID: z.string().min(1).default('demo-example-rest-api'),
+
+      // ── Indexed-event read path (GET /events) ───────────────────────────
+      // example-db namespaces its collections by network; this MUST match the
+      // value example-indexer writes with, or the API reads an empty
+      // collection. Same Firestore project + network = shared data.
+      NETWORK: z.enum(['mainnet', 'testnet', 'local']).default('local')
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true

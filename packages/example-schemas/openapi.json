@@ -246,6 +246,84 @@
           "id",
           "name"
         ]
+      },
+      "EventList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IndexedEvent"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "IndexedEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "chain": {
+            "type": "integer"
+          },
+          "contractAddress": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "blockNumber": {
+            "type": "integer"
+          },
+          "transactionIndex": {
+            "type": "integer"
+          },
+          "txHash": {
+            "type": "string"
+          },
+          "logIndex": {
+            "type": "integer"
+          },
+          "args": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "indexedAt": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "chain",
+          "contractAddress",
+          "eventName",
+          "blockNumber",
+          "txHash",
+          "logIndex",
+          "args",
+          "indexedAt"
+        ]
       }
     },
     "parameters": {}
@@ -611,6 +689,100 @@
           },
           "404": {
             "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "operationId": "listEvents",
+        "summary": "List indexed on-chain events",
+        "description": "Returns decoded events indexed by example-indexer, newest-first, with optional chain / contractAddress / eventName filters and opaque-cursor pagination.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "nullable": true
+            },
+            "required": false,
+            "name": "chain",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "contractAddress",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "eventName",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of indexed events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed schema validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Malformed pagination cursor",
             "content": {
               "application/json": {
                 "schema": {

@@ -8,6 +8,7 @@ import { JsonRpcProvider, Network } from 'ethers';
 import express, { json } from 'express';
 import helmet from 'helmet';
 
+import { createEventStore } from '@polygonlabs/example-db';
 import { buildRegistry } from '@polygonlabs/example-schemas';
 import { createErrorHandler, notFoundHandler, setupLogger } from '@polygonlabs/express';
 import { createRegistryRouter } from '@polygonlabs/express/registry';
@@ -17,12 +18,14 @@ import type { Logger } from './logger.ts';
 import { getEnv } from './env.ts';
 import { createFirestore } from './firestore.ts';
 import { buildAuthHandlers } from './handlers/auth.ts';
+import { buildEventHandlers } from './handlers/events.ts';
 import { buildMessageHandlers } from './handlers/messages.ts';
 import { buildNetworkHandlers } from './handlers/network.ts';
 import { buildStaticHandlers } from './handlers/static.ts';
 import { buildWidgetHandlers } from './handlers/widgets.ts';
 import { createRedisClient } from './redis.ts';
 import { openApiRouter } from './routes/openapi.ts';
+import { EventQueryService } from './services/EventQueryService.ts';
 import { MessageStore } from './services/MessageStore.ts';
 import { NetworkService } from './services/NetworkService.ts';
 import { WidgetService } from './services/WidgetService.ts';
@@ -152,6 +155,15 @@ export function createServer(logger: Logger, deps: ServerDependencies = {}): App
     }));
   };
 
+  // Read-only query service over example-db's EventStore — the same store
+  // example-indexer writes to. Built lazily (it opens a Firestore client) so
+  // the hermetic unit suite, which never hits GET /events, never connects.
+  let _eventQueryService: EventQueryService | undefined;
+  const getEventQueryService = (): EventQueryService =>
+    (_eventQueryService ??= new EventQueryService({
+      store: createEventStore({ db: createFirestore(), network: env.NETWORK })
+    }));
+
   const app = express();
 
   app.use(cors());
@@ -191,6 +203,7 @@ export function createServer(logger: Logger, deps: ServerDependencies = {}): App
       .implement(buildNetworkHandlers({ blockNumberService, getBlock }))
       .implement(buildMessageHandlers(messageStore))
       .implement(buildWidgetHandlers({ getWidgetService }))
+      .implement(buildEventHandlers({ getEventQueryService }))
       .toExpress();
 
     // Mount the registry-driven routes flat at the app root. Operation paths

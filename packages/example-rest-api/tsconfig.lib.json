@@ -9,5 +9,8 @@
     "lib": ["es2024", "DOM", "DOM.Iterable"]
   },
   "include": ["src/**/*.ts"],
-  "references": [{ "path": "../example-schemas/tsconfig.lib.json" }]
+  "references": [
+    { "path": "../example-schemas/tsconfig.lib.json" },
+    { "path": "../example-db/tsconfig.lib.json" }
+  ]
 }

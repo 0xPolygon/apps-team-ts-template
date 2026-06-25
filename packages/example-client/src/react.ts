@@ -41,6 +41,8 @@ export {
   getHelloQueryKey,
   getMessageOptions,
   getMessageQueryKey,
+  listEventsOptions,
+  listEventsQueryKey,
   listMessagesOptions,
   listMessagesQueryKey,
   type QueryKey

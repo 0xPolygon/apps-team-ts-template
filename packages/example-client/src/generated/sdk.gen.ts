@@ -2,8 +2,8 @@
 
 import { client } from './client.gen.js';
 import type { Client, Options as Options2, TDataShape } from './client/index.js';
-import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberErrors, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckErrors, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloErrors, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type GetWidgetErrors, type GetWidgetResponses, getWidgetTransformer, type ListMessagesErrors, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
-import type { CreateMessageData, GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, GetWidgetData, ListMessagesData } from './types.gen.js';
+import { type CreateMessageErrors, type CreateMessageResponses, createMessageTransformer, type GetBlockMetadataErrors, type GetBlockMetadataResponses, getBlockMetadataTransformer, type GetBlockNumberErrors, type GetBlockNumberResponses, getBlockNumberTransformer, type GetHealthCheckErrors, type GetHealthCheckResponses, getHealthCheckTransformer, type GetHelloErrors, type GetHelloResponses, getHelloTransformer, type GetMessageErrors, type GetMessageResponses, getMessageTransformer, type GetWidgetErrors, type GetWidgetResponses, getWidgetTransformer, type ListEventsErrors, type ListEventsResponses, listEventsTransformer, type ListMessagesErrors, type ListMessagesResponses, listMessagesTransformer } from './registry-validator.gen.js';
+import type { CreateMessageData, GetBlockMetadataData, GetBlockNumberData, GetHealthCheckData, GetHelloData, GetMessageData, GetWidgetData, ListEventsData, ListMessagesData } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -99,5 +99,16 @@ export const getMessage = <ThrowOnError extends boolean = false>(options: Option
 export const getWidget = <ThrowOnError extends boolean = false>(options: Options<GetWidgetData, ThrowOnError>) => (options.client ?? client).get<GetWidgetResponses, GetWidgetErrors, ThrowOnError>({
     responseTransformer: getWidgetTransformer,
     url: '/api/widgets/{id}',
+    ...options
+});
+
+/**
+ * List indexed on-chain events
+ *
+ * Returns decoded events indexed by example-indexer, newest-first, with optional chain / contractAddress / eventName filters and opaque-cursor pagination.
+ */
+export const listEvents = <ThrowOnError extends boolean = false>(options?: Options<ListEventsData, ThrowOnError>) => (options?.client ?? client).get<ListEventsResponses, ListEventsErrors, ThrowOnError>({
+    responseTransformer: listEventsTransformer,
+    url: '/events',
     ...options
 });

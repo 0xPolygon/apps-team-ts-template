@@ -1,0 +1,24 @@
+# Firestore emulator for the e2e suite. The kurtosis-pos devnet (bor on
+# 127.0.0.1:9545) is brought up separately by scripts/restore-e2e-snapshot.sh;
+# this compose file owns only the persistence layer the indexer writes to.
+#
+# Fixed host port 8080 (not ephemeral) because the e2e tier already pins fixed
+# ports for the shared devnet (8545/9545) and runs serially — the ephemeral-port
+# rule is for the concurrent unit+integration globalSetup, not here.
+services:
+  firestore-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: >-
+      gcloud beta emulators firestore start
+      --host-port=0.0.0.0:8080
+      --project=demo-example-indexer
+    ports:
+      - '8080:8080'
+    healthcheck:
+      # The emulator image has no curl; a bash TCP probe against the listening
+      # port is enough to know it's up.
+      test: ['CMD-SHELL', "bash -c 'echo > /dev/tcp/localhost/8080' 2>/dev/null || exit 1"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 5s
