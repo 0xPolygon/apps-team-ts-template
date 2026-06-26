@@ -32,15 +32,19 @@ See `pnpm-workspace.yaml` for workspace configuration.
   `vitest.config.ts`). The root `tsconfig.json` is itself a solution-style hub that
   references each package hub. See "Adding a New Package" below.
 
-There are three package roles:
+There are these package roles:
 
 | Package | Example | Published | Role |
 |---------|---------|-----------|------|
 | schemas | `example-schemas` | no | Zod schemas, OpenAPI registry, committed `openapi.json` |
 | client  | `example-client`  | no | hey-api-generated fetch SDK + TanStack Query options factories |
-| service | `example-rest-api` | no | Express app, Dockerfile, deployment |
+| service | `example-rest-api`, `example-indexer` | no | Deployable app with a Dockerfile (REST API; event indexer) |
+| library | `example-db` | no | Firestore-backed typed stores (`EventStore`, `CursorStore`) shared by the indexer and the REST API |
+| e2e | `example-e2e` | no | End-to-end suite against a live kurtosis-pos devnet (test package, not deployed) |
 
 The frontend (`example-frontend`) consumes the client package like any external consumer would.
+
+The indexer/db/REST API trio is a second worked example — see **Event-indexing Showcase** below.
 
 ## Commands
 
@@ -172,6 +176,61 @@ schemas are used at every layer.
   slots so the served spec, the runtime body, and the typed client agree.
   The subpath has zero Express-runtime imports, so a schemas-only consumer
   doesn't transitively depend on Express + pino + Sentry.
+
+## Event-indexing Showcase
+
+A second worked example wires three packages around
+[`@polygonlabs/viem-event-watcher`](https://www.npmjs.com/package/@polygonlabs/viem-event-watcher).
+The data flow is one-directional through a shared persistence layer neither service owns:
+
+```text
+example-indexer ──streamEvents (eth_getLogs polling)──▶ example-db (EventStore + CursorStore) ◀──GET /events── example-rest-api
+```
+
+- **`example-indexer`** (`packages/example-indexer/`) — a deployable service that drives the
+  watcher's `streamEvents`, decodes each log, writes it to `example-db`'s `EventStore`
+  (deduped on `tx_hash` + `log_index`), and advances a per-chain `CursorStore` to every
+  scanned batch's high-water-mark. It owns the cursor, restart loop, and logging; the watcher
+  uses `eth_getLogs` polling rather than `watchEvent` because bor's filters silently drop tip
+  logs. Rationale is in that package's README — read it before touching the consumer loop.
+- **`example-db`** (`packages/example-db/`) — the shared library. Zod schemas
+  (`IndexedEventSchema`, `EventCursorSchema`) are the source of truth, applied as a Firestore
+  data converter so every read is validated at the boundary. The storage shape is `snake_case`
+  with JSON-safe primitives (no `bigint`) — deliberately not a mirror of viem's `Log`. It lives
+  in its own package so the indexer (writer) and REST API (reader) share one validated schema
+  without either owning the other's view.
+- **`example-rest-api`** — `GET /events` reads the same `EventStore` back out, newest-first,
+  with optional filters and opaque-cursor pagination, served through the codegen client.
+
+## Testing
+
+This repo demonstrates the team's **four-layer test doctrine**; it does not restate it. The
+doctrine (and the rule that unit + service-integration share one config) lives in
+[`apps-team-ops/docs/best-practices/testing.md`](https://github.com/0xPolygon/apps-team-ops/blob/main/docs/best-practices/testing.md);
+the `globalSetup`-owns-the-resource pattern is in
+[`local-test-infrastructure.md`](https://github.com/0xPolygon/apps-team-ops/blob/main/docs/best-practices/local-test-infrastructure.md).
+Where each tier lives **in this repo**:
+
+- **Unit + service-integration** — together in each service's `tests/*.test.ts` under the one
+  `vitest.config.ts`. `example-rest-api`'s config owns the Firestore-emulator + Redis
+  `globalSetup` (`vitest.globalSetup.ts`); resource clients (`src/firestore.ts`, `src/redis.ts`)
+  are built lazily so the unit subset never connects. Run with `pnpm test` (or
+  `pnpm --filter @polygonlabs/example-rest-api run test`); it boots the emulators via
+  docker-compose on ephemeral ports. There is **no** `vitest.integration.config.ts` and **no**
+  `tests/integration/` directory — that split is the antipattern the doctrine removed.
+- **e2e** — `packages/example-e2e` only, files `*.e2e.test.ts`, under `vitest.e2e.config.ts`.
+  It indexes a contract's events off a live kurtosis-pos **bor** devnet and asserts they land
+  in `example-db`. The package has a `test:e2e` script but **no `test` script**, so
+  `pnpm -r run test` skips it. It is opt-in (`pnpm --filter @polygonlabs/example-e2e run e2e`,
+  the `run-e2e` PR label, or `workflow_dispatch`) and is a worked instance of **Path A — reuse
+  lst-api's published GHCR snapshot** in the
+  [kurtosis-e2e handbook](https://github.com/0xPolygon/apps-team-ops/blob/main/docs/best-practices/kurtosis-e2e-stack.md).
+  The devnet uses fixed host ports (`8545`/`9545`); check `docker ps` for running `pos-*`
+  containers before restoring it (another session may hold the devnet). See
+  `packages/example-e2e/README.md` for run/teardown commands.
+- **Prod-smoke** — none in this template yet; if added, files go in a service's
+  `tests/prod-smoke/*.prod-smoke.test.ts` and `vitest.config.ts` already excludes
+  `tests/prod-smoke/**` so a bare `pnpm test` can never hit a deployed instance.
 
 ## API Client Codegen
 
