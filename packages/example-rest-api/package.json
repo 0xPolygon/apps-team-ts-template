@@ -8,6 +8,8 @@
     "start": "node src/index.ts",
     "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
     "test": "vitest run",
+    "test:prod-smoke": "NODE_OPTIONS='--use-system-ca' SMOKE_BASE_URL=\"$SMOKE_PROD_URL\" vitest run --config vitest.prod-smoke.config.ts",
+    "test:dev-smoke": "NODE_OPTIONS='--use-system-ca' SMOKE_BASE_URL=\"$SMOKE_DEV_URL\" vitest run --config vitest.prod-smoke.config.ts",
     "typecheck": "tsc -b",
     "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },

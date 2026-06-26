@@ -42,3 +42,10 @@ Add an indexer → shared-db → REST-API showcase built on the new canonical
   antipattern the doctrine replaces. The config now excludes
   `tests/prod-smoke/**` so a bare `pnpm test` can never reach a deployed
   instance.
+- **`example-rest-api`** gains the fourth test tier — a **prod-smoke** suite
+  (`tests/prod-smoke/*.prod-smoke.test.ts` + `vitest.prod-smoke.config.ts`)
+  that hits a deployed instance over HTTPS and validates each response against
+  the route's own Zod schema (`HealthCheckResponse`, `EventList`). It runs only
+  via the new `test:prod-smoke` / `test:dev-smoke` scripts, never in CI, and
+  skips cleanly when the target URL is unset — so the template now demonstrates
+  all four test tiers (unit, service-integration, e2e, prod-smoke).

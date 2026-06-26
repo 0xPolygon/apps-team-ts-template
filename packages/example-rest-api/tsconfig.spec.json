@@ -8,10 +8,17 @@
     "rewriteRelativeImportExtensions": false,
     "allowImportingTsExtensions": true
   },
-  "include": ["tests/**/*.ts", "vitest.config.ts", "vitest.setup.ts", "vitest.globalSetup.ts"],
+  "include": [
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "vitest.prod-smoke.config.ts",
+    "vitest.setup.ts",
+    "vitest.globalSetup.ts"
+  ],
   "references": [
     { "path": "./tsconfig.lib.json" },
     { "path": "../example-client/tsconfig.lib.json" },
-    { "path": "../example-db/tsconfig.lib.json" }
+    { "path": "../example-db/tsconfig.lib.json" },
+    { "path": "../example-schemas/tsconfig.lib.json" }
   ]
 }
