@@ -1,5 +1,6 @@
-# Local test infrastructure for the in-process integration suite
-# (`pnpm run test:integration`). vitest.globalSetup.ts brings these up with
+# Local test infrastructure for the service-integration tests, which run
+# alongside the unit tests under the one `vitest.config.ts` (`pnpm test`).
+# vitest.globalSetup.ts brings these up with
 # `docker compose up -d --wait`, discovers the published host ports, points the
 # app at them (REDIS_URL + FIRESTORE_EMULATOR_HOST), and tears them down after.
 #

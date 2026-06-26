@@ -7,12 +7,7 @@
   "scripts": {
     "start": "node src/index.ts",
     "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
-    "test": "pnpm run test:unit && pnpm run test:integration",
-    "test:unit": "vitest run",
-    "test:integration": "vitest run --config vitest.integration.config.ts",
-    "test:local-integration": "INTEGRATION_TARGET=local vitest run --config vitest.integration.config.ts",
-    "test:dev-integration": "NODE_OPTIONS='--use-system-ca' INTEGRATION_TARGET=dev vitest run --config vitest.integration.config.ts",
-    "test:prod-integration": "NODE_OPTIONS='--use-system-ca' INTEGRATION_TARGET=prod vitest run --config vitest.integration.config.ts",
+    "test": "vitest run",
     "typecheck": "tsc -b",
     "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },

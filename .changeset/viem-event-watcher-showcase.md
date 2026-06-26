@@ -33,3 +33,12 @@ Add an indexer → shared-db → REST-API showcase built on the new canonical
 - **`example-schemas`** / **`example-client`** add the `IndexedEvent` /
   `EventList` schemas and the `listEvents` operation (spec + generated client
   regenerated).
+- **`example-rest-api`** now follows the four-layer test doctrine: unit and
+  service-integration tests run together under the one `vitest.config.ts`
+  (which owns the Firestore-emulator + Redis `globalSetup`), so `pnpm test`
+  runs both on every PR. The separate `vitest.integration.config.ts`, the
+  `tests/integration/` directory, and the `test:integration` /
+  `test:*-integration` scripts are removed — the prior split was the
+  antipattern the doctrine replaces. The config now excludes
+  `tests/prod-smoke/**` so a bare `pnpm test` can never reach a deployed
+  instance.

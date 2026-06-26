@@ -14,11 +14,18 @@ export default defineConfig({
     }
   },
   test: {
+    // The ONE config that runs unit + service-integration together (the
+    // four-layer doctrine: no separate vitest.integration.config.ts). The
+    // globalSetup owns the Firestore-emulator + Redis lifecycle; resource
+    // clients are built lazily (src/firestore.ts, src/redis.ts) so the unit
+    // subset never opens a connection. See
+    // apps-team-ops/docs/best-practices/{testing,local-test-infrastructure}.md.
     include: ['tests/**/*.test.ts'],
-    // Integration is opt-in via `pnpm run test:integration` — never picked up
-    // by the hermetic unit run, so it can't accidentally boot Docker or hit a
-    // deployment.
-    exclude: ['tests/integration/**', 'node_modules/**'],
+    // Keep prod-smoke OUT of `pnpm test` so a bare run can never hit a deployed
+    // instance — that tier runs only via its own `test:*-smoke` scripts. (No
+    // prod-smoke files exist yet; the exclude is the doctrine-mandated guard.)
+    exclude: ['tests/prod-smoke/**', 'node_modules/**'],
+    globalSetup: ['./vitest.globalSetup.ts'],
     setupFiles: ['./vitest.setup.ts'],
     ...(process.env.CI ? { reporters: ['verbose'] as const } : {})
   }

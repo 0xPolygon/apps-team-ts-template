@@ -91,8 +91,8 @@ function buildEnv() {
 
       // ── Cache-aside example: Redis + Firestore ──────────────────────────
       // The widget read path (GET /api/widgets/{id}) reads from Firestore
-      // through a Redis cache. The integration suite stands both up locally;
-      // see vitest.globalSetup.ts and tests/integration/.
+      // through a Redis cache. The service-integration tests stand both up
+      // locally; see vitest.globalSetup.ts and tests/cache-aside.integration.test.ts.
       //
       // `host:port`, not a `redis://` URI — matches the secret-store
       // convention used across our services. Parsed in src/redis.ts.

@@ -1,21 +1,27 @@
 /**
- * Vitest global setup for the in-process integration suite — owns env loading
- * AND the lifecycle of BOTH local resources (Firestore emulator + Redis),
- * mirroring pos-airdrop's (Firestore) and balance-api's (Redis) canonical
- * globalSetups combined into one.
+ * Vitest global setup owned by the ONE `vitest.config.ts` that runs unit +
+ * service-integration together (the four-layer doctrine — there is no separate
+ * vitest.integration.config.ts). It owns env loading AND the lifecycle of BOTH
+ * local resources (Firestore emulator + Redis), mirroring pos-airdrop's
+ * (Firestore) and balance-api's (Redis) canonical globalSetups combined into
+ * one. The unit subset stays fast because the app's resource clients are built
+ * lazily (src/firestore.ts, src/redis.ts) — a test that never touches a
+ * resource-backed route never opens a connection, even though the emulator is
+ * up.
  *
  * The gate flags are read from the RAW environment at module load (before any
  * .env loading), so they reflect what CI/shell actually set — not what the
  * .env files contain. This load-order invariant is load-bearing: `.env.test`
- * sets REDIS_URL + FIRESTORE_EMULATOR_HOST as placeholders for the hermetic
- * unit suite, and capturing the flags before that load is what keeps Docker
- * from being skipped locally. Keep the dotenvx calls inside setup().
+ * sets REDIS_URL + FIRESTORE_EMULATOR_HOST as placeholders so env validation
+ * passes for the unit subset, and capturing the flags before that load is what
+ * keeps Docker from being skipped locally. Keep the dotenvx calls inside
+ * setup().
  *
  * Three modes:
- * - URL target (`INTEGRATION_TARGET` / `TEST_BASE_URL`): the suite hits a
- *   deployed server — no local infra. (This stateful cache-aside suite is
- *   in-process only; the URL path exists for the canonical pattern that
- *   STATELESS suites like balance-api use — see tests/integration/agent.ts.)
+ * - URL target (`TEST_BASE_URL`): the suite is pointed at an already-running
+ *   server, so no local infra is managed here. (The service-integration tests
+ *   in this package are STATEFUL and run in-process; this branch is the gate a
+ *   stateless suite pointed at a local server would rely on.)
  * - BOTH `REDIS_URL` and `FIRESTORE_EMULATOR_HOST` already set (CI service
  *   containers via `job.env`, or a dev pointing at their own infra): use them
  *   as-is — don't manage Docker. The explicit-injection path.
@@ -34,7 +40,7 @@ import { resolve } from 'node:path';
 
 import { config as dotenvxConfig } from '@dotenvx/dotenvx';
 
-const targetingUrl = !!process.env['INTEGRATION_TARGET'] || !!process.env['TEST_BASE_URL'];
+const targetingUrl = !!process.env['TEST_BASE_URL'];
 const resourcesProvided = !!process.env['REDIS_URL'] && !!process.env['FIRESTORE_EMULATOR_HOST'];
 const manageDocker = !targetingUrl && !resourcesProvided;
 

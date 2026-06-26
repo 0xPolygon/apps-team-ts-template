@@ -9,9 +9,11 @@
  * API serves the camelCase projection, newest-first, with opaque-cursor
  * pagination.
  *
- * STATEFUL (seeds Firestore directly), so it runs in-process only —
- * `skipIf(isUrlTarget)`, mirroring the cache-aside suite. `beforeEach` wipes
- * the collection so tests are order-independent under shuffle.
+ * Service-integration tier (per the four-layer doctrine): it lives alongside
+ * the unit tests in `tests/*.test.ts` under the one `vitest.config.ts` whose
+ * `globalSetup` stands up the Firestore emulator, and it runs in-process on
+ * every PR. STATEFUL — it seeds Firestore directly, so `beforeEach` wipes the
+ * collection to keep tests order-independent under shuffle.
  */
 import type { Firestore } from '@google-cloud/firestore';
 
@@ -22,9 +24,9 @@ import type { IndexedEvent } from '@polygonlabs/example-db';
 import { client, listEvents } from '@polygonlabs/example-client';
 import { eventsCollection, createEventStore } from '@polygonlabs/example-db';
 
-import { getEnv } from '../../src/env.ts';
-import { createFirestore } from '../../src/firestore.ts';
-import { closeAgent, getAgent, isUrlTarget } from './agent.ts';
+import { getEnv } from '../src/env.ts';
+import { createFirestore } from '../src/firestore.ts';
+import { closeAgent, getAgent } from './helpers/agent.ts';
 
 const CONTRACT = '0x00000000000000000000000000000000000000aa';
 
@@ -52,7 +54,7 @@ beforeAll(async () => {
 
 afterAll(() => closeAgent());
 
-describe.skipIf(isUrlTarget)('GET /events (in-process): indexed-event read path', () => {
+describe('GET /events (in-process): indexed-event read path', { timeout: 30_000 }, () => {
   let db!: Firestore;
   let store!: ReturnType<typeof createEventStore>;
   const network = getEnv().NETWORK;
