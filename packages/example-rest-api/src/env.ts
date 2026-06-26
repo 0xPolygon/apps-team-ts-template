@@ -91,8 +91,8 @@ function buildEnv() {
 
       // ── Cache-aside example: Redis + Firestore ──────────────────────────
       // The widget read path (GET /api/widgets/{id}) reads from Firestore
-      // through a Redis cache. The integration suite stands both up locally;
-      // see vitest.globalSetup.ts and tests/integration/.
+      // through a Redis cache. The service-integration tests stand both up
+      // locally; see vitest.globalSetup.ts and tests/cache-aside.integration.test.ts.
       //
       // `host:port`, not a `redis://` URI — matches the secret-store
       // convention used across our services. Parsed in src/redis.ts.
@@ -110,7 +110,13 @@ function buildEnv() {
       // A `demo-*` project id keeps the emulator credential-free. In
       // production this is the real GCP project. The default lets a fresh
       // clone run the integration suite against the emulator with no setup.
-      GOOGLE_CLOUD_PROJECT_ID: z.string().min(1).default('demo-example-rest-api')
+      GOOGLE_CLOUD_PROJECT_ID: z.string().min(1).default('demo-example-rest-api'),
+
+      // ── Indexed-event read path (GET /events) ───────────────────────────
+      // example-db namespaces its collections by network; this MUST match the
+      // value example-indexer writes with, or the API reads an empty
+      // collection. Same Firestore project + network = shared data.
+      NETWORK: z.enum(['mainnet', 'testnet', 'local']).default('local')
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true

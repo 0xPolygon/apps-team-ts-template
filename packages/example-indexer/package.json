@@ -1,0 +1,51 @@
+{
+  "name": "@polygonlabs/example-indexer",
+  "version": "0.1.0",
+  "description": "Event-indexing service: drives @polygonlabs/viem-event-watcher's streamEvents to consume on-chain logs and persist them to example-db.",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "exports": {
+    ".": "./src/index.ts",
+    "./services": "./src/services.ts",
+    "./consumer": "./src/consumer.ts"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "dev": "dotenvx run -- node --conditions @polygonlabs/source --watch src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -b",
+    "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^8.3.0",
+    "@polygonlabs/example-db": "workspace:*",
+    "@polygonlabs/express": "^4.0.0",
+    "@polygonlabs/logger": "^3.0.0",
+    "@polygonlabs/verror": "^1.1.0",
+    "@polygonlabs/viem-event-watcher": "^1.0.1",
+    "@sentry/node": "^10.0.0",
+    "@t3-oss/env-core": "^0.13.10",
+    "cors": "^2.8.5",
+    "express": "^5.0.0",
+    "helmet": "^7.0.0",
+    "viem": "^2.37.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "^1.0.0",
+    "@tsconfig/node-ts": "^23.0.0",
+    "@tsconfig/node24": "^24.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "pino-pretty": ">=13.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xPolygon/apps-team-ts-template.git",
+    "directory": "packages/example-indexer"
+  }
+}

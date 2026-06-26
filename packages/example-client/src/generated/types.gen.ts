@@ -93,6 +93,26 @@ export type Widget = {
     name: string;
 };
 
+export type EventList = {
+    items: Array<IndexedEvent>;
+    nextCursor: string | null;
+};
+
+export type IndexedEvent = {
+    id: string;
+    chain: number;
+    contractAddress: string;
+    eventName: string;
+    blockNumber: number;
+    transactionIndex?: number;
+    txHash: string;
+    logIndex: number;
+    args: {
+        [key: string]: string | number | boolean;
+    };
+    indexedAt: number;
+};
+
 export type GetHealthCheckData = {
     body?: never;
     path?: never;
@@ -337,3 +357,42 @@ export type GetWidgetResponses = {
 };
 
 export type GetWidgetResponse = GetWidgetResponses[keyof GetWidgetResponses];
+
+export type ListEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        chain?: number | null;
+        contractAddress?: string;
+        eventName?: string;
+        cursor?: string;
+        limit?: number;
+    };
+    url: '/events';
+};
+
+export type ListEventsErrors = {
+    /**
+     * Request failed schema validation.
+     */
+    400: ValidationErrorResponse;
+    /**
+     * Malformed pagination cursor
+     */
+    422: ErrorResponse;
+    /**
+     * Internal server error.
+     */
+    500: ErrorResponse;
+};
+
+export type ListEventsError = ListEventsErrors[keyof ListEventsErrors];
+
+export type ListEventsResponses = {
+    /**
+     * Page of indexed events
+     */
+    200: EventList;
+};
+
+export type ListEventsResponse = ListEventsResponses[keyof ListEventsResponses];

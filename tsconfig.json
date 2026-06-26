@@ -5,7 +5,10 @@
   "references": [
     { "path": "./packages/example-schemas" },
     { "path": "./packages/example-client" },
+    { "path": "./packages/example-db" },
+    { "path": "./packages/example-indexer" },
     { "path": "./packages/example-rest-api" },
-    { "path": "./packages/example-frontend" }
+    { "path": "./packages/example-frontend" },
+    { "path": "./packages/example-e2e" }
   ]
 }

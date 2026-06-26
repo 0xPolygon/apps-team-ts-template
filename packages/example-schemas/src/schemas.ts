@@ -104,6 +104,48 @@ export const Widget = z
   })
   .openapi('Widget');
 
+// Indexed event — the read side of the indexer→db→REST showcase. This is the
+// API projection (camelCase) of the storage-facing `IndexedEvent` that
+// `example-indexer` writes to `example-db` (snake_case); the rest-api's
+// EventQueryService maps between the two at the boundary. Deliberately
+// codec-free: the lesson here is the cross-service data flow, not codec
+// round-tripping (that already lives on Message/Block).
+export const IndexedEvent = z
+  .object({
+    id: z.string(),
+    chain: z.number().int(),
+    contractAddress: z.string(),
+    eventName: z.string(),
+    blockNumber: z.number().int(),
+    transactionIndex: z.number().int().optional(),
+    txHash: z.string(),
+    logIndex: z.number().int(),
+    args: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+    indexedAt: z.number().int()
+  })
+  .openapi('IndexedEvent');
+
+export const EventList = z
+  .object({
+    items: z.array(IndexedEvent),
+    // Opaque pagination token; pass back as `cursor` for the next page.
+    nextCursor: z.string().nullable()
+  })
+  .openapi('EventList');
+
+// Query for GET /events. All filters optional. `chain` and `limit` arrive as
+// URL strings, so they're coerced; the registry-driven validator runs this
+// schema against `req.query` before the handler sees it.
+export const ListEventsQuery = z
+  .object({
+    chain: z.coerce.number().int().optional(),
+    contractAddress: z.string().optional(),
+    eventName: z.string().optional(),
+    cursor: z.string().optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional()
+  })
+  .openapi('ListEventsQuery');
+
 // Error response shapes are not hand-rolled here. The registry-driven
 // router in `@polygonlabs/express` auto-injects the canonical
 // `ErrorResponse` (for 401/5xx) and `ValidationErrorResponse` (for 400)

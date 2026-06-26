@@ -15,6 +15,9 @@ three-package schemas/service/client pattern with build-free local development.
 | `packages/example-client` | hey-api-generated fetch SDK and TanStack Query options factories |
 | `packages/example-rest-api` | Express REST API service with Dockerfile |
 | `packages/example-frontend` | React + Vite frontend using the client package |
+| `packages/example-db` | Firestore-backed typed stores (`EventStore`, `CursorStore`) shared by the indexer and the REST API |
+| `packages/example-indexer` | Event-indexing service driving `@polygonlabs/viem-event-watcher` → `example-db` |
+| `packages/example-e2e` | End-to-end suite: index a contract's events off a live kurtosis-pos devnet and assert they land in `example-db` |
 
 All packages are private — this repo is a reference implementation, not a publishable library.
 
@@ -137,6 +140,57 @@ wires service lifecycle to the HTTP server. `serverEvents` emits `cronRegistered
 `getAgent()` returns `{ agent, baseUrl }` — a supertest agent and the URL it targets.
 When `TEST_BASE_URL` is set the same tests run against a deployed instance (e.g. a Docker
 container). The server is started once on `listen(0)` and reused for the file's lifetime.
+
+## Event-indexing Showcase (indexer → db → REST API)
+
+A second worked example wires three packages around the new canonical
+[`@polygonlabs/viem-event-watcher`](https://www.npmjs.com/package/@polygonlabs/viem-event-watcher),
+demonstrating a shared-persistence pattern where two services agree on a schema neither owns:
+
+```text
+on-chain logs
+  → example-indexer   drives viem-event-watcher's streamEvents (eth_getLogs polling,
+                      not watchEvent — reliable on Polygon bor), decodes each log, and
+                      writes it to ↓
+  → example-db        Firestore-backed EventStore (+ per-chain CursorStore); Zod schemas
+                      are the source of truth, applied as a Firestore converter ↑↓
+  → example-rest-api  GET /events reads the same EventStore back out, newest-first, with
+                      filters and opaque-cursor pagination, served via the codegen client
+```
+
+`example-db` lives in its own package precisely so the schema is defined once and the indexer
+(writer) and REST API (reader) depend on the same validated types without either owning the
+other's view. See each package's README for the details — in particular
+`packages/example-indexer/README.md` on **why `getLogs` polling instead of `watchEvent`**.
+
+## Testing — the four-layer doctrine
+
+This template is a worked instance of the team's four-layer test doctrine; it does not
+re-explain it. Read the doctrine itself in
+[`apps-team-ops/docs/best-practices/testing.md`](https://github.com/0xPolygon/apps-team-ops/blob/main/docs/best-practices/testing.md).
+A test's tier is decided by **what real thing it touches**:
+
+| Tier | Touches | Where | Run by |
+|------|---------|-------|--------|
+| **Unit** | nothing | each service's `tests/*.test.ts` | `pnpm test` (every PR) |
+| **Service integration** | the service's own data deps (Firestore emulator, Redis) | **mixed with unit** in `tests/*.test.ts`, under the one `vitest.config.ts` | `pnpm test` (every PR) |
+| **e2e** | the real external world (the chain, via kurtosis) | `packages/example-e2e`, `*.e2e.test.ts` | opt-in (`run-e2e` label / `workflow_dispatch`) |
+| **Prod-smoke** | a deployed instance over HTTPS | a service's `tests/prod-smoke/` | manual; never CI |
+
+The load-bearing rules the template demonstrates:
+
+- **Unit + service-integration share one `vitest.config.ts`** per service — `example-rest-api`'s
+  config owns the Firestore-emulator + Redis `globalSetup`, and resource clients are built
+  lazily so the unit subset never opens a connection. There is **no** `vitest.integration.config.ts`
+  and **no** `tests/integration/` directory — that split is the antipattern the doctrine removed.
+- **e2e is the only tier behind kurtosis.** `example-e2e` indexes a contract's events off a live
+  bor devnet and asserts they reach `example-db`; it has a `test:e2e` script but **no `test`
+  script**, so `pnpm -r run test` skips it. It is a worked instance of **Path A — reuse lst-api's
+  published GHCR snapshot** in the
+  [kurtosis-e2e handbook](https://github.com/0xPolygon/apps-team-ops/blob/main/docs/best-practices/kurtosis-e2e-stack.md);
+  see `packages/example-e2e/README.md` for the run commands.
+- **Tiers don't leak across packages** — no service depends on the e2e package, and the e2e
+  package wires services together through their production factories only.
 
 ## How the Three-Package Pattern Works
 

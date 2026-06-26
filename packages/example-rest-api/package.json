@@ -7,18 +7,16 @@
   "scripts": {
     "start": "node src/index.ts",
     "dev": "dotenvx run -- node --conditions @polygonlabs/source src/index.ts",
-    "test": "pnpm run test:unit && pnpm run test:integration",
-    "test:unit": "vitest run",
-    "test:integration": "vitest run --config vitest.integration.config.ts",
-    "test:local-integration": "INTEGRATION_TARGET=local vitest run --config vitest.integration.config.ts",
-    "test:dev-integration": "NODE_OPTIONS='--use-system-ca' INTEGRATION_TARGET=dev vitest run --config vitest.integration.config.ts",
-    "test:prod-integration": "NODE_OPTIONS='--use-system-ca' INTEGRATION_TARGET=prod vitest run --config vitest.integration.config.ts",
+    "test": "vitest run",
+    "test:prod-smoke": "NODE_OPTIONS='--use-system-ca' SMOKE_BASE_URL=\"$SMOKE_PROD_URL\" vitest run --config vitest.prod-smoke.config.ts",
+    "test:dev-smoke": "NODE_OPTIONS='--use-system-ca' SMOKE_BASE_URL=\"$SMOKE_DEV_URL\" vitest run --config vitest.prod-smoke.config.ts",
     "typecheck": "tsc -b",
     "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.1",
     "@google-cloud/firestore": "^8.3.0",
+    "@polygonlabs/example-db": "workspace:*",
     "@polygonlabs/example-schemas": "workspace:*",
     "@polygonlabs/express": "^4.0.0",
     "@polygonlabs/logger": "^3.0.0",
