@@ -22,8 +22,8 @@ export default defineConfig({
     // apps-team-ops/docs/best-practices/{testing,local-test-infrastructure}.md.
     include: ['tests/**/*.test.ts'],
     // Keep prod-smoke OUT of `pnpm test` so a bare run can never hit a deployed
-    // instance — that tier runs only via its own `test:*-smoke` scripts. (No
-    // prod-smoke files exist yet; the exclude is the doctrine-mandated guard.)
+    // instance — that tier lives in tests/prod-smoke/ and runs only via its own
+    // `test:*-smoke` scripts against vitest.prod-smoke.config.ts.
     exclude: ['tests/prod-smoke/**', 'node_modules/**'],
     globalSetup: ['./vitest.globalSetup.ts'],
     setupFiles: ['./vitest.setup.ts'],
