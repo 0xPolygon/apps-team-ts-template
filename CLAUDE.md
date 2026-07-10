@@ -314,10 +314,6 @@ client gate's dist-based generate work on a fresh checkout. See
 `apps-team-ops/docs/best-practices/codegen-management.md` for the
 general pattern.
 
-The repo's `sonar-project.properties` excludes `**/src/generated/**`
-from analysis and coverage so the snapshot doesn't dominate Sonar
-issue counts.
-
 See `packages/zod-to-openapi-heyapi/README.md` in `apps-team-packages`
 for the plugin's full design, option semantics, and migration notes.
 
