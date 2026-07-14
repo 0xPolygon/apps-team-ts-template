@@ -56,11 +56,15 @@ function discoverHostPort(service: string, containerPort: string): string | unde
   return mapping.split(':').at(-1) || undefined;
 }
 
-// Resource vars whose externally-provided value (CI / a dev pointing at their
-// own infra) must survive the `.env.test` override below. `.env.test` carries
-// localhost placeholders ONLY so the hermetic unit suite passes env
-// validation; they must never clobber real values CI injected.
-const RESOURCE_VARS = [
+// Vars whose externally-provided value (CI / a dev pointing at their own
+// infra) must survive the `.env.test` override below. `.env.test` carries
+// placeholders ONLY so the hermetic unit suite passes env validation; they
+// must never clobber real values CI injected. MANAGEMENT_API_KEY is here
+// because the docker-release test job starts the container with its own key
+// and the suite must authenticate with that same value — letting the
+// committed placeholder win produced 401s on every auth-gated container test.
+const PRESERVED_VARS = [
+  'MANAGEMENT_API_KEY',
   'REDIS_URL',
   'REDIS_CLUSTER',
   'FIRESTORE_EMULATOR_HOST',
@@ -68,9 +72,9 @@ const RESOURCE_VARS = [
 ] as const;
 
 export function setup(): void {
-  // Capture externally-provided resource vars before loading .env files.
+  // Capture externally-provided vars before loading .env files.
   const provided = new Map(
-    RESOURCE_VARS.filter((k) => process.env[k] !== undefined).map((k) => [k, process.env[k]])
+    PRESERVED_VARS.filter((k) => process.env[k] !== undefined).map((k) => [k, process.env[k]])
   );
 
   // MISSING_ENV_FILE is suppressed so URL-target and CI runs (env via the
@@ -87,9 +91,9 @@ export function setup(): void {
     quiet: true
   });
 
-  // Restore externally-provided resource vars so CI-injected values win over
-  // the committed .env.test placeholders. (.env.test still supplies the rest —
-  // RPC_URL, MANAGEMENT_API_KEY — which CI does not inject.)
+  // Restore externally-provided vars so CI-injected values win over the
+  // committed .env.test placeholders. Anything not externally set (the local
+  // in-process run) still comes from .env.test.
   for (const [k, v] of provided) process.env[k] = v;
 
   if (!manageDocker) return;

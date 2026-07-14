@@ -11,13 +11,15 @@ import {
   listMessages
 } from '@polygonlabs/example-client';
 
+import { getTestEnv } from './env.ts';
 import { closeAgent, getAgent } from './helpers/agent.ts';
 
 afterAll(() => closeAgent());
 
 const { agent, baseUrl } = getAgent();
-const TEST_API_KEY = 'test-secret';
-// Mirrors the .env.test value the in-process server reads at startup.
+const { INPROCESS, MANAGEMENT_API_KEY: TEST_API_KEY } = getTestEnv();
+// The key the server under test was configured with (see tests/env.ts) —
+// `.env.test` in-process, the CI job's injected value in TEST_BASE_URL mode.
 // Configuring it on the SDK once propagates to every typed-client call;
 // raw `agent.*` requests below set it manually.
 client.setConfig({
@@ -54,13 +56,19 @@ describe('API — registry-driven, codegen client round-trip', () => {
 
   describe('GET /api/block-number', () => {
     it('returns the polled block number, decoded to bigint via Int64Codec', async () => {
-      // The default test fetcher returns 22_000_000; NetworkService caches it
-      // after the first poll. The response transformer runs Int64Codec.parseAsync
-      // and the caller sees a real bigint, not the wire string.
+      // In-process, the default test fetcher returns 22_000_000; NetworkService
+      // caches it after the first poll. The response transformer runs
+      // Int64Codec.parseAsync and the caller sees a real bigint, not the wire
+      // string. In TEST_BASE_URL mode the container polls the real RPC, so the
+      // value is the live chain head — assert the codec decode, not the height.
       const { data } = await getBlockNumber();
       expect(data).property('blockNumber');
       expect(typeof data?.blockNumber).toBe('bigint');
-      expect(data?.blockNumber).toEqual(22_000_000n);
+      if (INPROCESS) {
+        expect(data?.blockNumber).toEqual(22_000_000n);
+      } else {
+        expect(data?.blockNumber).toBeGreaterThan(0n);
+      }
     });
   });
 
@@ -76,17 +84,27 @@ describe('API — registry-driven, codegen client round-trip', () => {
       // multiple Int64Codec fields; the response validator encodes them on
       // the way out, and the client's response transformer decodes them
       // back to bigint on receipt.
-      const blockNumber = 9_007_199_254_740_993n; // 2^53 + 1 — outside Number safety
+      // In-process, the stub echoes any height, so 2^53 + 1 (outside Number
+      // safety) stresses that the codec path never round-trips through Number.
+      // A real chain (TEST_BASE_URL mode) has no such block — use a
+      // well-finalised mainnet height instead; the wire round-trip
+      // (bigint → digit string → bigint) is identical, only the Number-unsafe
+      // magnitude is in-process-only.
+      const blockNumber = INPROCESS ? 9_007_199_254_740_993n : 22_000_000n;
       const { data, error } = await getBlockMetadata({ path: { blockNumber } });
       expect(error).toBeUndefined();
-      expect(data?.number).toEqual(9_007_199_254_740_993n);
+      expect(data?.number).toEqual(blockNumber);
       expect(typeof data?.number).toBe('bigint');
       expect(typeof data?.timestamp).toBe('bigint');
       expect(data?.hash).toMatch(/^0x[0-9a-f]+$/);
     });
 
     it('responds 404 with NotFound shape when handler returns null', async () => {
-      const { data, error, response } = await getBlockMetadata({ path: { blockNumber: 0n } });
+      // The in-process stub maps 0n → null. On a real chain block 0 is the
+      // genesis block, which exists — so TEST_BASE_URL mode asks for a
+      // far-future height the chain cannot have reached; the RPC answers null.
+      const missing = INPROCESS ? 0n : 99_999_999_999n;
+      const { data, error, response } = await getBlockMetadata({ path: { blockNumber: missing } });
       expect(data).toBeUndefined();
       expect(response.status).toBe(404);
       expect(error).property('error', true);
