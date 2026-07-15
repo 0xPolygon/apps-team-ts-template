@@ -4,6 +4,7 @@
   "description": "Zod response schemas, OpenAPI registry, and committed spec for the Example REST API",
   "type": "module",
   "private": true,
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.30.3",
   "exports": {
     ".": {
