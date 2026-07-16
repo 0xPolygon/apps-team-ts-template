@@ -1,5 +1,16 @@
 # example-frontend
 
+## 1.0.8
+
+### Patch Changes
+
+- [#60](https://github.com/0xPolygon/apps-team-ts-template/pull/60) [`bcec096`](https://github.com/0xPolygon/apps-team-ts-template/commit/bcec096723b0875b7696ef63251e3580c9bf8e2b) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Add Apache-2.0 license
+
+  The repository now ships an Apache License 2.0 `LICENSE` file at the root, and every package declares `"license": "Apache-2.0"` in its `package.json`.
+
+- Updated dependencies [[`bcec096`](https://github.com/0xPolygon/apps-team-ts-template/commit/bcec096723b0875b7696ef63251e3580c9bf8e2b), [`35e35fa`](https://github.com/0xPolygon/apps-team-ts-template/commit/35e35fa75acba3a2658ec96a17b6ff995c7814f7)]:
+  - @polygonlabs/example-client@0.6.0
+
 ## 1.0.7
 
 ### Patch Changes
