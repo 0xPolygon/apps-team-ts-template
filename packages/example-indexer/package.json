@@ -4,6 +4,7 @@
   "description": "Event-indexing service: drives @polygonlabs/viem-event-watcher's streamEvents to consume on-chain logs and persist them to example-db.",
   "type": "module",
   "private": true,
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.30.3",
   "exports": {
     ".": "./src/index.ts",

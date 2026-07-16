@@ -4,6 +4,7 @@
   "description": "End-to-end suite: index a contract's events off a live kurtosis-pos bor devnet and assert they land in example-db.",
   "type": "module",
   "private": true,
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "e2e": "bash scripts/run-e2e.sh",

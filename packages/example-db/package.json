@@ -4,6 +4,7 @@
   "description": "Firestore-backed typed stores for the indexer→db→REST showcase: an EventStore of decoded on-chain events and a per-chain cursor store.",
   "type": "module",
   "private": true,
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.30.3",
   "exports": {
     ".": {
