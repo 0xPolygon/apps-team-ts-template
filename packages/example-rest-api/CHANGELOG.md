@@ -1,5 +1,25 @@
 # example-rest-api
 
+## 0.6.1
+
+### Patch Changes
+
+- [#62](https://github.com/0xPolygon/apps-team-ts-template/pull/62) [`90dc551`](https://github.com/0xPolygon/apps-team-ts-template/commit/90dc551650f743fa9ab29084ae52728db6a7c213) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Ship the LICENSE file inside each package directory
+
+  The previous release added the Apache-2.0 license at the repo root and
+  declared it in package.json, but npm only auto-includes a LICENSE file
+  in the packed tarball when it lives in the same directory as the
+  package's own package.json. These packages are all private today, but
+  this keeps the pattern correct for any package that publishes later.
+
+- [#63](https://github.com/0xPolygon/apps-team-ts-template/pull/63) [`357ff03`](https://github.com/0xPolygon/apps-team-ts-template/commit/357ff03103e48718f5883ae34781581db85ed4b4) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Update dependencies to resolve reported security advisories.
+
+  The REST API's auth tests now account for `@polygonlabs/express` 4.1 running request validation before auth handlers — a malformed request to a protected route returns 400 (validation error) instead of 401. See that package's MIGRATION.md.
+
+- Updated dependencies [[`90dc551`](https://github.com/0xPolygon/apps-team-ts-template/commit/90dc551650f743fa9ab29084ae52728db6a7c213)]:
+  - @polygonlabs/example-db@0.2.1
+  - @polygonlabs/example-schemas@1.2.1
+
 ## 0.6.0
 
 ### Minor Changes
