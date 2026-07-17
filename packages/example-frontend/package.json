@@ -17,7 +17,7 @@
     "@coinbase/wallet-sdk": "^4.3.0",
     "@metamask/connect-evm": "^0.9.0",
     "@polygonlabs/example-client": "workspace:*",
-    "@polygonlabs/wallet-kit": "^1.0.1",
+    "@polygonlabs/wallet-kit": "^2.0.2",
     "@polygonlabs/zod-to-openapi-heyapi": "^2.0.3",
     "@sentry/react": "^10.29.0",
     "@t3-oss/env-core": "^0.13.10",
