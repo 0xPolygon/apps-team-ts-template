@@ -123,9 +123,10 @@ describe('API — registry-driven, codegen client round-trip', () => {
     });
 
     it('responds 401 when x-api-key is missing', async () => {
-      // Auth runs before request validation, so even a malformed path
-      // returns 401 — never decodes the codec.
-      const res = await agent.get('/api/blocks/notanumber');
+      // Request validation runs before auth (@polygonlabs/express ≥4.1 —
+      // see its MIGRATION.md), so the path must be well-formed here: a
+      // malformed path would return 400 before the auth handler runs.
+      const res = await agent.get('/api/blocks/123');
       expect(res.status).toBe(401);
       expect(res.body).property('error', true);
       expect(res.body.message).toMatch(/unauthorized/i);

@@ -11,8 +11,14 @@ minimumReleaseAgeExclude:
   - '@0xtrails/*'
 # katex 0.16.34 (transitive dep of markdownlint-cli2) has a broken ESM build
 # where __VERSION__ is not replaced at build time, crashing on Node 24.
+# js-yaml/markdown-it/bn.js: parents (markdownlint-cli2,
+# @hey-api/json-schema-ref-parser, @metamask/number-to-bn) pin exact versions
+# with open security advisories; force the patched releases in-major.
 overrides:
   katex: ^0.16.38
+  'js-yaml@4': ^4.2.0
+  'markdown-it@14': ^14.2.0
+  'bn.js@5': ^5.2.3
 onlyBuiltDependencies:
   - esbuild
 trustPolicy: no-downgrade

@@ -109,11 +109,7 @@ export const ApiErrorMessage = ({ error, testId = 'api-error' }: ApiErrorMessage
 interface ErrorBoxProps {
   readonly testId: string;
   readonly category:
-    | 'transport'
-    | 'response-validation'
-    | 'native-error'
-    | 'typed'
-    | 'unrecognised';
+    'transport' | 'response-validation' | 'native-error' | 'typed' | 'unrecognised';
   readonly headline: string;
   readonly detail: string;
 }
