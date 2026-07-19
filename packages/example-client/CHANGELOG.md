@@ -1,5 +1,24 @@
 # @polygonlabs/example-client
 
+## 0.6.1
+
+### Patch Changes
+
+- [#63](https://github.com/0xPolygon/apps-team-ts-template/pull/63) [`54c3c82`](https://github.com/0xPolygon/apps-team-ts-template/commit/54c3c82cdb02f951fdf28db484955905089c7eca) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Update `@hey-api/openapi-ts` to 0.97.3 to resolve a reported security advisory, align `@polygonlabs/zod-to-openapi-heyapi` to 2.0.3, and regenerate the client.
+
+  The regenerated fetch runtime restructures request/error handling internally (a single try/catch around the request lifecycle); the client's API surface is unchanged, and the generated output is byte-identical under the updated plugin.
+
+- [#62](https://github.com/0xPolygon/apps-team-ts-template/pull/62) [`90dc551`](https://github.com/0xPolygon/apps-team-ts-template/commit/90dc551650f743fa9ab29084ae52728db6a7c213) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Ship the LICENSE file inside each package directory
+
+  The previous release added the Apache-2.0 license at the repo root and
+  declared it in package.json, but npm only auto-includes a LICENSE file
+  in the packed tarball when it lives in the same directory as the
+  package's own package.json. These packages are all private today, but
+  this keeps the pattern correct for any package that publishes later.
+
+- Updated dependencies [[`90dc551`](https://github.com/0xPolygon/apps-team-ts-template/commit/90dc551650f743fa9ab29084ae52728db6a7c213)]:
+  - @polygonlabs/example-schemas@1.2.1
+
 ## 0.6.0
 
 ### Minor Changes

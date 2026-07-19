@@ -1,6 +1,6 @@
 {
   "name": "@polygonlabs/example-indexer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Event-indexing service: drives @polygonlabs/viem-event-watcher's streamEvents to consume on-chain logs and persist them to example-db.",
   "type": "module",
   "private": true,

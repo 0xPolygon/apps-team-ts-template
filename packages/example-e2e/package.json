@@ -1,6 +1,6 @@
 {
   "name": "@polygonlabs/example-e2e",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "End-to-end suite: index a contract's events off a live kurtosis-pos bor devnet and assert they land in example-db.",
   "type": "module",
   "private": true,
