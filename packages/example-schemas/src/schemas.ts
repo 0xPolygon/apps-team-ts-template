@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Int64Codec, IsoDateCodec } from '@polygonlabs/zod-codecs';
+import { Int64Codec, IsoDateCodec, SafeIntegerCodec } from '@polygonlabs/zod-codecs';
 import { extendZodAndCodecsWithOpenApi } from '@polygonlabs/zod-codecs/openapi';
 
 // Called here so this file is self-contained — any direct import triggers
@@ -134,15 +134,31 @@ export const EventList = z
   .openapi('EventList');
 
 // Query for GET /events. All filters optional. `chain` and `limit` arrive as
-// URL strings, so they're coerced; the registry-driven validator runs this
-// schema against `req.query` before the handler sees it.
+// URL strings, so they use codecs (wire string ↔ runtime number); the
+// registry-driven validator runs this schema against `req.query` before the
+// handler sees it, replacing the strings with the decoded numbers.
+//
+// NOT `z.coerce.number()`: in zod v4 a coercing schema's input type is
+// `unknown`, so the generated OpenAPI documents the parameter as optional
+// and nullable regardless of intent — `@polygonlabs/openapi-registry` v3
+// rejects coercing schemas in parameter positions at generate time for
+// exactly this reason. Codecs declare both sides honestly.
+//
+// `limit` is a locally-rolled codec because it carries range constraints:
+// the constraint lives on the OUTPUT schema, so it applies to the decoded
+// number (and to `z.encode` round-trips), not the wire string.
+const LimitCodec = z.codec(z.string().regex(/^\d+$/), z.number().int().min(1).max(100), {
+  decode: (s) => Number(s),
+  encode: (n) => n.toString()
+});
+
 export const ListEventsQuery = z
   .object({
-    chain: z.coerce.number().int().optional(),
+    chain: SafeIntegerCodec.optional(),
     contractAddress: z.string().optional(),
     eventName: z.string().optional(),
     cursor: z.string().optional(),
-    limit: z.coerce.number().int().min(1).max(100).optional()
+    limit: LimitCodec.optional()
   })
   .openapi('ListEventsQuery');
 

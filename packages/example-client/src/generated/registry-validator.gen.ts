@@ -20,10 +20,6 @@ export type GetHealthCheckErrors = {
 
 export type GetHealthCheckError = GetHealthCheckErrors[keyof GetHealthCheckErrors];
 
-export const getHealthCheckTransformer = async (data: unknown): Promise<z.output<typeof HealthCheckResponse>> => await HealthCheckResponse.parseAsync(data);
-
-export const getHealthCheckErrorTransformer = async (data: unknown): Promise<z.output<typeof ErrorResponse>> => await ErrorResponse.parseAsync(data);
-
 /**
  * @internal — emitted by `@polygonlabs/zod-to-openapi-heyapi`. Do not
  * instantiate from consumer code; the wrapper constructs these in
@@ -81,12 +77,26 @@ export type WrapErrors<TData, TError, ThrowOnError extends boolean, TResponseSty
     response: Response;
 }>;
 
+export const getHealthCheckTransformer = async (data: unknown): Promise<z.output<typeof HealthCheckResponse>> => {
+    try {
+        return await HealthCheckResponse.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
+
+export const getHealthCheckErrorTransformer = async (data: unknown): Promise<z.output<typeof ErrorResponse>> => await ErrorResponse.parseAsync(data);
+
 export const getHealthCheck = async <ThrowOnError extends boolean = false, TResponseStyle extends 'fields' | 'data' = 'fields'>(options?: Options<GetHealthCheckData, ThrowOnError>): WrapErrors<GetHealthCheckResponses, GetHealthCheckErrors, ThrowOnError, TResponseStyle> => {
     let result;
     try {
         result = await getHealthCheck2(options);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -102,7 +112,7 @@ export const getHealthCheck = async <ThrowOnError extends boolean = false, TResp
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -130,7 +140,14 @@ export type GetHelloErrors = {
 
 export type GetHelloError = GetHelloErrors[keyof GetHelloErrors];
 
-export const getHelloTransformer = async (data: unknown): Promise<z.output<typeof HelloResponse>> => await HelloResponse.parseAsync(data);
+export const getHelloTransformer = async (data: unknown): Promise<z.output<typeof HelloResponse>> => {
+    try {
+        return await HelloResponse.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const getHelloErrorTransformer = async (data: unknown): Promise<z.output<typeof ErrorResponse>> => await ErrorResponse.parseAsync(data);
 
@@ -140,6 +157,9 @@ export const getHello = async <ThrowOnError extends boolean = false, TResponseSt
         result = await getHello2(options);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -155,7 +175,7 @@ export const getHello = async <ThrowOnError extends boolean = false, TResponseSt
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -183,7 +203,14 @@ export type GetBlockNumberErrors = {
 
 export type GetBlockNumberError = GetBlockNumberErrors[keyof GetBlockNumberErrors];
 
-export const getBlockNumberTransformer = async (data: unknown): Promise<z.output<typeof BlockNumberResponse>> => await BlockNumberResponse.parseAsync(data);
+export const getBlockNumberTransformer = async (data: unknown): Promise<z.output<typeof BlockNumberResponse>> => {
+    try {
+        return await BlockNumberResponse.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const getBlockNumberErrorTransformer = async (data: unknown): Promise<z.output<typeof ErrorResponse>> => await ErrorResponse.parseAsync(data);
 
@@ -193,6 +220,9 @@ export const getBlockNumber = async <ThrowOnError extends boolean = false, TResp
         result = await getBlockNumber2(options);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -208,7 +238,7 @@ export const getBlockNumber = async <ThrowOnError extends boolean = false, TResp
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -239,7 +269,14 @@ export type GetBlockMetadataErrors = {
 
 export type GetBlockMetadataError = GetBlockMetadataErrors[keyof GetBlockMetadataErrors];
 
-export const getBlockMetadataTransformer = async (data: unknown): Promise<z.output<typeof BlockMetadata>> => await BlockMetadata.parseAsync(data);
+export const getBlockMetadataTransformer = async (data: unknown): Promise<z.output<typeof BlockMetadata>> => {
+    try {
+        return await BlockMetadata.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const getBlockMetadataErrorTransformer = async (data: unknown): Promise<z.output<typeof ValidationErrorResponse> | z.output<typeof ErrorResponse>> => await z.union([ValidationErrorResponse, ErrorResponse]).parseAsync(data);
 
@@ -256,6 +293,9 @@ export const getBlockMetadata = async <ThrowOnError extends boolean = false, TRe
         result = await getBlockMetadata2({ ...options, ...transformed } as Options<GetBlockMetadataData, ThrowOnError>);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -271,7 +311,7 @@ export const getBlockMetadata = async <ThrowOnError extends boolean = false, TRe
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -337,7 +377,14 @@ export type ListMessagesErrors = {
 
 export type ListMessagesError = ListMessagesErrors[keyof ListMessagesErrors];
 
-export const listMessagesTransformer = async (data: unknown): Promise<z.output<typeof MessageList>> => await MessageList.parseAsync(data);
+export const listMessagesTransformer = async (data: unknown): Promise<z.output<typeof MessageList>> => {
+    try {
+        return await MessageList.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const listMessagesErrorTransformer = async (data: unknown): Promise<z.output<typeof ValidationErrorResponse> | z.output<typeof ErrorResponse>> => await z.union([ValidationErrorResponse, ErrorResponse]).parseAsync(data);
 
@@ -354,6 +401,9 @@ export const listMessages = async <ThrowOnError extends boolean = false, TRespon
         result = await listMessages2({ ...options, ...transformed } as Options<ListMessagesData, ThrowOnError>);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -369,7 +419,7 @@ export const listMessages = async <ThrowOnError extends boolean = false, TRespon
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -410,7 +460,14 @@ export type CreateMessageErrors = {
 
 export type CreateMessageError = CreateMessageErrors[keyof CreateMessageErrors];
 
-export const createMessageTransformer = async (data: unknown): Promise<z.output<typeof Message>> => await Message.parseAsync(data);
+export const createMessageTransformer = async (data: unknown): Promise<z.output<typeof Message>> => {
+    try {
+        return await Message.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const createMessageErrorTransformer = async (data: unknown): Promise<z.output<typeof ValidationErrorResponse> | z.output<typeof ErrorResponse>> => await z.union([ValidationErrorResponse, ErrorResponse]).parseAsync(data);
 
@@ -427,6 +484,9 @@ export const createMessage = async <ThrowOnError extends boolean = false, TRespo
         result = await createMessage2({ ...options, ...transformed } as Options<CreateMessageData, ThrowOnError>);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -442,7 +502,7 @@ export const createMessage = async <ThrowOnError extends boolean = false, TRespo
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -484,7 +544,14 @@ export type GetMessageErrors = {
 
 export type GetMessageError = GetMessageErrors[keyof GetMessageErrors];
 
-export const getMessageTransformer = async (data: unknown): Promise<z.output<typeof Message>> => await Message.parseAsync(data);
+export const getMessageTransformer = async (data: unknown): Promise<z.output<typeof Message>> => {
+    try {
+        return await Message.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const getMessageErrorTransformer = async (data: unknown): Promise<z.output<typeof ValidationErrorResponse> | z.output<typeof ErrorResponse>> => await z.union([ValidationErrorResponse, ErrorResponse]).parseAsync(data);
 
@@ -494,6 +561,9 @@ export const getMessage = async <ThrowOnError extends boolean = false, TResponse
         result = await getMessage2(options);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -509,7 +579,7 @@ export const getMessage = async <ThrowOnError extends boolean = false, TResponse
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -539,7 +609,14 @@ export type GetWidgetErrors = {
 
 export type GetWidgetError = GetWidgetErrors[keyof GetWidgetErrors];
 
-export const getWidgetTransformer = async (data: unknown): Promise<z.output<typeof Widget>> => await Widget.parseAsync(data);
+export const getWidgetTransformer = async (data: unknown): Promise<z.output<typeof Widget>> => {
+    try {
+        return await Widget.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const getWidgetErrorTransformer = async (data: unknown): Promise<z.output<typeof ValidationErrorResponse> | z.output<typeof ErrorResponse>> => await z.union([ValidationErrorResponse, ErrorResponse]).parseAsync(data);
 
@@ -549,6 +626,9 @@ export const getWidget = async <ThrowOnError extends boolean = false, TResponseS
         result = await getWidget2(options);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -564,7 +644,7 @@ export const getWidget = async <ThrowOnError extends boolean = false, TResponseS
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }
@@ -594,7 +674,14 @@ export type ListEventsErrors = {
 
 export type ListEventsError = ListEventsErrors[keyof ListEventsErrors];
 
-export const listEventsTransformer = async (data: unknown): Promise<z.output<typeof EventList>> => await EventList.parseAsync(data);
+export const listEventsTransformer = async (data: unknown): Promise<z.output<typeof EventList>> => {
+    try {
+        return await EventList.parseAsync(data);
+    }
+    catch (err) {
+        throw new ResponseValidationError(err as ZodError, data);
+    }
+};
 
 export const listEventsErrorTransformer = async (data: unknown): Promise<z.output<typeof ValidationErrorResponse> | z.output<typeof ErrorResponse>> => await z.union([ValidationErrorResponse, ErrorResponse]).parseAsync(data);
 
@@ -611,6 +698,9 @@ export const listEvents = async <ThrowOnError extends boolean = false, TResponse
         result = await listEvents2({ ...options, ...transformed } as Options<ListEventsData, ThrowOnError>);
     }
     catch (err) {
+        if (typeof err === "object" && err !== null && (err as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true) {
+            throw err;
+        }
         if (err instanceof Error) {
             throw new TransportError(err as Error);
         }
@@ -626,7 +716,7 @@ export const listEvents = async <ThrowOnError extends boolean = false, TResponse
     const errorBearing = result as {
         error?: unknown;
     };
-    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null)) {
+    if (typeof result === "object" && result !== null && "request" in result && "response" in result && (typeof errorBearing.error === "object" && errorBearing.error !== null) && !(typeof errorBearing.error === "object" && errorBearing.error !== null && (errorBearing.error as Record<symbol, unknown>)[Symbol.for("@polygonlabs/zod-to-openapi-heyapi/is-response-validation-error")] === true)) {
         if (errorBearing.error instanceof Error) {
             errorBearing.error = new TransportError(errorBearing.error as Error);
         }

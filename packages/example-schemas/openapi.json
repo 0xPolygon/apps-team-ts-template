@@ -718,8 +718,8 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "nullable": true
+              "type": "string",
+              "pattern": "^-?\\d+$"
             },
             "required": false,
             "name": "chain",
@@ -751,9 +751,8 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100
+              "type": "string",
+              "pattern": "^\\d+$"
             },
             "required": false,
             "name": "limit",
