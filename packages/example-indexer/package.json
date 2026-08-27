@@ -21,7 +21,7 @@
   "dependencies": {
     "@google-cloud/firestore": "^8.3.0",
     "@polygonlabs/example-db": "workspace:*",
-    "@polygonlabs/express": "^4.0.0",
+    "@polygonlabs/express": "^5.0.0",
     "@polygonlabs/logger": "^3.0.0",
     "@polygonlabs/verror": "^1.1.0",
     "@polygonlabs/viem-event-watcher": "^1.0.1",

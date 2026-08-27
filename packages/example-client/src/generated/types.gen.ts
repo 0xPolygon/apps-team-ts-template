@@ -362,11 +362,11 @@ export type ListEventsData = {
     body?: never;
     path?: never;
     query?: {
-        chain?: number | null;
+        chain?: string;
         contractAddress?: string;
         eventName?: string;
         cursor?: string;
-        limit?: number;
+        limit?: string;
     };
     url: '/events';
 };
