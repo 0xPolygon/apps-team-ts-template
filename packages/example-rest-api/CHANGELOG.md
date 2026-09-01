@@ -1,5 +1,16 @@
 # example-rest-api
 
+## 0.6.2
+
+### Patch Changes
+
+- [#67](https://github.com/0xPolygon/apps-team-ts-template/pull/67) [`7135bf6`](https://github.com/0xPolygon/apps-team-ts-template/commit/7135bf677ec05e7e13b52e1e603cee7c3ae2c660) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Adopt the registry-v3 package line
+
+  Bumps `@polygonlabs/openapi-registry` to ^3.0.0 (generate-time rejection of coercing parameter schemas; configurable standard-error injection), `@polygonlabs/zod-codecs` to ^1.2.0 (`SafeIntegerCodec`), `@polygonlabs/zod-to-openapi-heyapi` to ^2.0.4 (2xx schema violations now surface as `ResponseValidationError`), and `@polygonlabs/express` to ^5.0.0 (registry v3 peer). Generated output is unchanged — the codec-based query parameters landed in the companion change.
+
+- Updated dependencies [[`7135bf6`](https://github.com/0xPolygon/apps-team-ts-template/commit/7135bf677ec05e7e13b52e1e603cee7c3ae2c660), [`dc581d8`](https://github.com/0xPolygon/apps-team-ts-template/commit/dc581d87abfbc7bf8800ff4e3fb846c3fbb2ce03)]:
+  - @polygonlabs/example-schemas@1.2.2
+
 ## 0.6.1
 
 ### Patch Changes
