@@ -28,6 +28,7 @@
     "build": "pnpm run typecheck && tsc -b tsconfig.lib.json",
     "build:clean": "pnpm run typecheck && rm -rf dist out-tsc *.tsbuildinfo && tsc -b tsconfig.lib.json",
     "prepublishOnly": "pnpm run build",
+    "check:package": "publint",
     "typecheck": "tsc -b",
     "clean": "rm -rf dist out-tsc node_modules *.tsbuildinfo"
   },
@@ -39,6 +40,7 @@
     "@tsconfig/node-ts": "^23.0.0",
     "@tsconfig/node24": "^24.0.0",
     "@types/node": "^24.0.0",
+    "publint": "^0.3.21",
     "typescript": "^5.5.0"
   },
   "repository": {
