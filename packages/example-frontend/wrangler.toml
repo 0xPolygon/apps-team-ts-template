@@ -8,8 +8,8 @@ send_metrics = false
 [assets]
 directory = "./dist"
 
-[build]
-command = "pnpm run build"
+# No [build] hook: the workflow builds in its own step, so wrangler never runs
+# the build with the Cloudflare token in its environment.
 
 [env.staging]
 routes = [

@@ -20,20 +20,26 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 1
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm dlx wrangler deploy --env ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+      # Build without the Cloudflare credentials: only wrangler ever sees them.
+      - run: pnpm run build
         env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_WORKER_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKER_API_TOKEN }}
           VITE_SEQUENCE_PROJECT_ACCESS_KEY: ${{ secrets.VITE_SEQUENCE_PROJECT_ACCESS_KEY }}
           VITE_SEQUENCE_WAAS_KEY: ${{ secrets.VITE_SEQUENCE_WAAS_KEY }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      # `pnpm exec` runs the wrangler recorded in pnpm-lock.yaml. `pnpm dlx` / `npx`
+      # would fetch it and its dependency tree from the registry at deploy time,
+      # outside the lockfile, with the Cloudflare token in the environment.
+      - run: pnpm exec wrangler deploy --env ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_WORKER_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_WORKER_API_TOKEN }}
