@@ -1,5 +1,12 @@
 # example-rest-api
 
+## 0.6.3
+
+### Patch Changes
+
+- Updated dependencies [[`123ff82`](https://github.com/0xPolygon/apps-team-ts-template/commit/123ff82761b606aaf8f14177e09ee8ef9ad4ffc5)]:
+  - @polygonlabs/example-schemas@1.2.3
+
 ## 0.6.2
 
 ### Patch Changes

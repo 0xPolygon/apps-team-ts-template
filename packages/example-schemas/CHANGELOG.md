@@ -1,5 +1,11 @@
 # @polygonlabs/example-schemas
 
+## 1.2.3
+
+### Patch Changes
+
+- [#73](https://github.com/0xPolygon/apps-team-ts-template/pull/73) [`123ff82`](https://github.com/0xPolygon/apps-team-ts-template/commit/123ff82761b606aaf8f14177e09ee8ef9ad4ffc5) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Publish @polygonlabs/example-schemas to npm as a public package.
+
 ## 1.2.2
 
 ### Patch Changes
