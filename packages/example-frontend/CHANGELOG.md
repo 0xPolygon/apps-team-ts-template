@@ -1,5 +1,19 @@
 # example-frontend
 
+## 1.0.11
+
+### Patch Changes
+
+- [#70](https://github.com/0xPolygon/apps-team-ts-template/pull/70) [`a48d421`](https://github.com/0xPolygon/apps-team-ts-template/commit/a48d42108d92e220fc95c8f297964598015ce7bc) Thanks [@shan8851](https://github.com/shan8851)! - Run the Cloudflare deploy with a lockfile-resolved `wrangler` instead of fetching it at deploy time.
+
+  - `wrangler` is now a devDependency and the reference deploy workflow runs it with `pnpm exec`
+  - the build runs in its own step, so the Cloudflare credentials are only present for the deploy
+  - `wrangler.toml` no longer has a `[build]` hook
+  - third-party actions in the reference workflows are pinned to commit SHAs
+
+- Updated dependencies []:
+  - @polygonlabs/example-client@0.6.3
+
 ## 1.0.10
 
 ### Patch Changes
