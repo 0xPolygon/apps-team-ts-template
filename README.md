@@ -19,7 +19,7 @@ three-package schemas/service/client pattern with build-free local development.
 | `packages/example-indexer` | Event-indexing service driving `@polygonlabs/viem-event-watcher` → `example-db` |
 | `packages/example-e2e` | End-to-end suite: index a contract's events off a live kurtosis-pos devnet and assert they land in `example-db` |
 
-All packages are private — this repo is a reference implementation, not a publishable library.
+All packages are private except `@polygonlabs/example-schemas`, which is published to npm from this repository. Copies of this template must rename or re-privatise the example packages before their first release.
 
 ## What's Included
 
