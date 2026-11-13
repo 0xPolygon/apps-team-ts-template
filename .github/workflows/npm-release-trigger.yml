@@ -8,10 +8,12 @@ permissions:
   contents: write
   pull-requests: write
   id-token: write
+  attestations: write # build provenance attestations in the called release workflow
 
 jobs:
   release:
-    uses: 0xPolygon/pipelines/.github/workflows/apps-npm-release.yml@main
+    # Pinned to a commit for a release-pipeline test; returns to @main afterwards.
+    uses: 0xPolygon/pipelines/.github/workflows/apps-npm-release.yml@630a5e38cb0913bba4464911c06e2e9fdc8a75f7
     secrets:
       CHANGESET_RELEASE_BOT_APP_ID: ${{ secrets.CHANGESET_RELEASE_BOT_APP_ID }}
       CHANGESET_RELEASE_BOT_APP_PRIVATE_KEY: ${{ secrets.CHANGESET_RELEASE_BOT_APP_PRIVATE_KEY }}
