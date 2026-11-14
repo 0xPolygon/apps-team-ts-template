@@ -1,5 +1,12 @@
 # example-rest-api
 
+## 0.6.4
+
+### Patch Changes
+
+- Updated dependencies [[`1b6812a`](https://github.com/0xPolygon/apps-team-ts-template/commit/1b6812afeee1d9d796ed60da5b941504333a55b9)]:
+  - @polygonlabs/example-db@0.2.2
+
 ## 0.6.3
 
 ### Patch Changes
