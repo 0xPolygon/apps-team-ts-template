@@ -1,5 +1,11 @@
 # @polygonlabs/example-db
 
+## 0.2.2
+
+### Patch Changes
+
+- [#74](https://github.com/0xPolygon/apps-team-ts-template/pull/74) [`1b6812a`](https://github.com/0xPolygon/apps-team-ts-template/commit/1b6812afeee1d9d796ed60da5b941504333a55b9) Thanks [@MaximusHaximus](https://github.com/MaximusHaximus)! - Release example-db to exercise the release workflow for a private package.
+
 ## 0.2.1
 
 ### Patch Changes
