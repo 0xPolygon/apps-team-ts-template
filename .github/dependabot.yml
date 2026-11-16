@@ -1,14 +1,18 @@
 version: 2
 updates:
-  # One grouped PR per month: each bump costs a human approval in every consumer repo.
-  # Only `/` is configured: the docs state `/` covers .github/workflows, and do not
-  # document a value for the nested packages/example-frontend/.github/workflows.
+  # Grouped PRs per month: each bump costs a human approval in every consumer repo.
+  # First-party actions arrive in one group at any version; third-party majors are left out of
+  # the group (update-types) so each arrives as its own PR for individual review.
   - package-ecosystem: github-actions
-    directory: /
+    directories: ['/', '/packages/example-frontend']
     schedule: { interval: monthly }
     cooldown: { default-days: 7 }
     groups:
-      actions: { patterns: ['*'] }
+      actions-first-party: { patterns: ['0xPolygon/*'] }
+      actions-third-party:
+        patterns: ['*']
+        exclude-patterns: ['0xPolygon/*']
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly, day: monday }
