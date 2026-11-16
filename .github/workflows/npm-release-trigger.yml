@@ -12,8 +12,7 @@ permissions:
 
 jobs:
   release:
-    # Pinned to a fixed version for a release-pipeline test; returns to @main afterwards.
-    uses: 0xPolygon/pipelines/.github/workflows/apps-npm-release.yml@df5cb854823ddf40e863ccb584c21e5a88d9542e
+    uses: 0xPolygon/pipelines/.github/workflows/apps-npm-release.yml@main
     secrets:
       CHANGESET_RELEASE_BOT_APP_ID: ${{ secrets.CHANGESET_RELEASE_BOT_APP_ID }}
       CHANGESET_RELEASE_BOT_APP_PRIVATE_KEY: ${{ secrets.CHANGESET_RELEASE_BOT_APP_PRIVATE_KEY }}
