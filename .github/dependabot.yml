@@ -4,7 +4,10 @@ updates:
   # First-party actions arrive in one group at any version; third-party majors are left out of
   # the group (update-types) so each arrives as its own PR for individual review.
   - package-ecosystem: github-actions
-    directories: ['/', '/packages/example-frontend']
+    # For a non-root directory Dependabot reads the workflow files directly in that folder,
+    # so the entry points at .github/workflows, not at the package root.
+    # Consumers without the example-frontend package: delete that entry.
+    directories: ['/', '/packages/example-frontend/.github/workflows']
     schedule: { interval: monthly }
     cooldown: { default-days: 7 }
     groups:
@@ -16,6 +19,9 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly, day: monday }
+    # lockfile-only never proposes a version that needs a package.json change, so a major
+    # upgrade is a deliberate hand edit; semver-major-days only delays majors that an
+    # open-ended range already allows.
     versioning-strategy: lockfile-only
     open-pull-requests-limit: 5
     cooldown:
