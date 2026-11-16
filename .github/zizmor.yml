@@ -1,0 +1,15 @@
+# zizmor `unpinned-uses` policy. Every `uses:` must be pinned to a full commit SHA, except the
+# job-level reusable workflows listed below, which may be pinned to a ref (`@main`): they are
+# first-party and a workflow file can only be called at job level. Step-level actions, including
+# pipelines composite actions, stay hash-pinned. Calling a new shared workflow needs one added line.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        0xPolygon/pipelines/.github/workflows/apps-changeset-check.yml: ref-pin
+        0xPolygon/pipelines/.github/workflows/apps-claude-code-review.yml: ref-pin
+        0xPolygon/pipelines/.github/workflows/apps-claude.yml: ref-pin
+        0xPolygon/pipelines/.github/workflows/apps-codegen-drift-check.yml: ref-pin
+        0xPolygon/pipelines/.github/workflows/apps-docker-release.yml: ref-pin
+        0xPolygon/pipelines/.github/workflows/apps-npm-release.yml: ref-pin
+        '*': hash-pin

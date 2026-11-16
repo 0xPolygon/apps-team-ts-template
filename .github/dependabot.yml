@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # Grouped PRs per month: each bump costs a human approval in every consumer repo.
+  # First-party actions arrive in one group at any version; third-party majors are left out of
+  # the group (update-types) so each arrives as its own PR for individual review.
+  - package-ecosystem: github-actions
+    # For a non-root directory Dependabot reads the workflow files directly in that folder,
+    # so the entry points at .github/workflows, not at the package root.
+    # Consumers without the example-frontend package: delete that entry.
+    directories: ['/', '/packages/example-frontend/.github/workflows']
+    schedule: { interval: monthly }
+    cooldown: { default-days: 7 }
+    groups:
+      actions-first-party: { patterns: ['0xPolygon/*'] }
+      actions-third-party:
+        patterns: ['*']
+        exclude-patterns: ['0xPolygon/*']
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    # lockfile-only never proposes a version that needs a package.json change, so a major
+    # upgrade is a deliberate hand edit; semver-major-days only delays majors that an
+    # open-ended range already allows.
+    versioning-strategy: lockfile-only
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+      semver-major-days: 90
+      exclude: ['@polygonlabs/*', '@maticnetwork/*', '@agglayer/*', '@0xsequence/*', '@0xtrails/*']
+    groups:
+      npm-minor-patch: { patterns: ['*'], update-types: [minor, patch] }
