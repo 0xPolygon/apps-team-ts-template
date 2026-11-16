@@ -50,7 +50,7 @@ jobs:
       # container itself — so the built image reaches them. Same sibling-
       # container pattern as balance-api / pos-airdrop. The image's
       # cache-aside read path (GET /api/widgets/{id}) needs both reachable.
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Start integration test infrastructure
         run: .github/scripts/start-integration-resources.sh 172.17.0.1
       - id: docker-test
