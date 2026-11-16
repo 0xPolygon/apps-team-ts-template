@@ -1,4 +1,4 @@
-name: CI
+name: CI Trigger
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ jobs:
       # Check out first so the integration resources' docker-compose.yml and
       # start script are present before the CI composite (which does its own
       # checkout) runs `pnpm test`.
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Start integration test infrastructure
         # example-rest-api's integration suite needs Redis + a Firestore
         # emulator. The Firestore emulator can't be a GitHub Actions `services:`
