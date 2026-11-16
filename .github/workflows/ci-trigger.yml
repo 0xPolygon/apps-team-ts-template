@@ -25,7 +25,7 @@ jobs:
         # FIRESTORE_EMULATOR_HOST to $GITHUB_ENV so vitest.globalSetup defers to
         # these instead of managing Docker itself — the canonical CI handoff.
         run: .github/scripts/start-integration-resources.sh localhost
-      - uses: 0xPolygon/pipelines/.github/actions/ci@332867571721d220895ee4178d9b650db42a6da2 # main
+      - uses: 0xPolygon/pipelines/.github/actions/ci@cb7db0e0135424415839eefb4a81052a84cda278 # main
 
   drift-check:
     # Discrete PR-check status separate from lint/typecheck/test so a drift
