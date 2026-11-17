@@ -21,6 +21,8 @@ three-package schemas/service/client pattern with build-free local development.
 
 All packages are private except `@polygonlabs/example-schemas`, which is published to npm from this repository. Copies of this template must rename or re-privatise the example packages before their first release.
 
+Publishing waits for a reviewer's approval in the `npm-publish` environment, and the shared release workflow publishes one release at a time. When several releases are waiting, approve or reject the oldest one first: later publishes queue behind it.
+
 ## What's Included
 
 - **pnpm workspaces** — topological build ordering; no manual sequencing
