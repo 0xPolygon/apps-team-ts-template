@@ -38,7 +38,9 @@ All packages are private except `@polygonlabs/example-schemas`, which is publish
 - **Vitest** — test runner with `ssr.resolve.conditions` / `resolve.conditions` configured
   so tests resolve workspace library source without building `dist/`
 - **Husky** — pre-commit (lint-staged) and pre-push (changeset check) hooks
-- **Changesets** — versioning, changelog, and npm publishing
+- **Changesets** — versioning, changelog, and npm publishing (a stable version older than the package's
+  current `latest` is published under the `previous` dist-tag, so approving releases out of order does
+  not move `latest` backwards)
 - **Environment validation** — `@t3-oss/env-core` + Zod per package
 
 ## Getting Started
