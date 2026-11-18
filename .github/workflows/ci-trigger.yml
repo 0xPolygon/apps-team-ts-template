@@ -35,3 +35,11 @@ jobs:
     # example-client regenerates, so the client codegen resolves the schemas
     # package's built dist/ exactly as a fresh checkout requires.
     uses: 0xPolygon/pipelines/.github/workflows/apps-codegen-drift-check.yml@main
+
+  package-check:
+    # Publish-artifact hygiene: builds, then runs each publishable package's
+    # `check:package` script (publint — validates that the packed tarball's
+    # exports/types/files actually resolve). Here that's example-db, the
+    # package modelling the published-library shape; the other examples
+    # define no `check:package`, so `--if-present` skips them.
+    uses: 0xPolygon/pipelines/.github/workflows/apps-package-check.yml@main
